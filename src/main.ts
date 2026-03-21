@@ -1,108 +1,255 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
-import * as fs from 'fs'
+import * as fs from 'fs/promises'
+import { existsSync, createReadStream } from 'fs'
 import * as path from 'path'
 import { google } from 'googleapis'
 
-export async function run(): Promise<void> {
-  let keystorePath: string = ''
+// --- Type Definitions ---
+
+interface ActionConfig {
+  androidDirectory: string
+  keystoreBase64: string
+  keystorePassword: string
+  keyAlias: string
+  keyPassword: string
+  serviceAccountJson: string
+  packageName: string
+  track: string
+  status: string
+}
+
+const VALID_TRACKS = ['internal', 'alpha', 'beta', 'production']
+const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
+
+// --- Helper Functions ---
+
+/**
+ * Reads, parses, and validates all inputs from the GitHub Actions environment.
+ */
+function getConfig(): ActionConfig {
+  const config: ActionConfig = {
+    androidDirectory: core.getInput('androidDirectory', { required: true }),
+    keystoreBase64: core.getInput('keystoreBase64', { required: true }),
+    keystorePassword: core.getInput('keystorePassword', { required: true }),
+    keyAlias: core.getInput('keyAlias', { required: true }),
+    keyPassword: core.getInput('keyPassword', { required: true }),
+    serviceAccountJson: core.getInput('serviceAccountJsonPlainText', {
+      required: true,
+    }),
+    packageName: core.getInput('packageName', { required: true }),
+    track: core.getInput('track', { required: true }),
+    status: core.getInput('status', { required: true }),
+  }
+
+  // 1. Validate Directory Existence
+  if (!existsSync(config.androidDirectory)) {
+    throw new Error(`Android directory not found: ${config.androidDirectory}`)
+  }
+
+  // 2. Validate Enums
+  if (!VALID_TRACKS.includes(config.track)) {
+    throw new Error(
+      `Invalid track: '${config.track}'. Must be one of: ${VALID_TRACKS.join(', ')}`,
+    )
+  }
+  if (!VALID_STATUSES.includes(config.status)) {
+    throw new Error(
+      `Invalid status: '${config.status}'. Must be one of: ${VALID_STATUSES.join(', ')}`,
+    )
+  }
+
+  // 3. Validate JSON format early
+  try {
+    JSON.parse(config.serviceAccountJson)
+  } catch {
+    throw new Error('serviceAccountJsonPlainText is not valid JSON.')
+  }
+
+  return config
+}
+
+/**
+ * Decodes the base64 keystore and writes it to disk.
+ * Returns the absolute path to the decoded file.
+ */
+async function setupKeystore(
+  androidDir: string,
+  base64Data: string,
+): Promise<string> {
+  core.info('Decoding and saving keystore securely...')
+  const keystorePath = path.join(androidDir, 'temp_release.keystore')
 
   try {
-    const androidDirectory: string = core.getInput('androidDirectory', {
-      required: true,
-    })
-    const keystoreBase64: string = core.getInput('keystoreBase64', {
-      required: true,
-    })
-    const keystorePassword: string = core.getInput('keystorePassword', {
-      required: true,
-    })
-    const keyAlias: string = core.getInput('keyAlias', { required: true })
-    const keyPassword: string = core.getInput('keyPassword', { required: true })
+    const keystoreBuffer = Buffer.from(base64Data, 'base64')
+    // Use async writeFile for better Node.js event loop performance
+    await fs.writeFile(keystorePath, keystoreBuffer)
+    return keystorePath
+  } catch (error) {
+    throw new Error('Failed to decode and save keystore', { cause: error })
+  }
+}
 
-    const serviceAccountJson: string = core.getInput('serviceAccountJson', {
-      required: true,
-    })
-    const packageName: string = core.getInput('packageName', { required: true })
-    const track: string = core.getInput('track', { required: true })
-    const status: string = core.getInput('status', { required: true })
+/**
+ * Executes the Gradle build process to generate the signed AAB.
+ * Returns the path to the generated AAB file.
+ */
+async function buildAndSignAab(
+  config: ActionConfig,
+  keystorePath: string,
+): Promise<string> {
+  core.info('Building and signing the AAB...')
+  const gradlewPath = path.join(config.androidDirectory, 'gradlew')
 
-    core.info('Decoding keystore...')
-    keystorePath = path.join(androidDirectory, 'temp_release.keystore')
-    const keystoreBuffer: Buffer = Buffer.from(keystoreBase64, 'base64')
-    fs.writeFileSync(keystorePath, keystoreBuffer)
+  if (!existsSync(gradlewPath)) {
+    throw new Error(`gradlew executable not found at ${gradlewPath}`)
+  }
 
-    core.info('Building and signing the AAB...')
-    const gradlewPath: string = path.join(androidDirectory, 'gradlew')
-    fs.chmodSync(gradlewPath, '755')
+  await fs.chmod(gradlewPath, '755')
 
-    await exec.exec(
-      './gradlew',
-      [
-        'bundleRelease',
-        `-Pandroid.injected.signing.store.file=${keystorePath}`,
-        `-Pandroid.injected.signing.store.password=${keystorePassword}`,
-        `-Pandroid.injected.signing.key.alias=${keyAlias}`,
-        `-Pandroid.injected.signing.key.password=${keyPassword}`,
-      ],
-      { cwd: androidDirectory },
+  const gradleArgs = [
+    'bundleRelease',
+    `-Pandroid.injected.signing.store.file=${keystorePath}`,
+    `-Pandroid.injected.signing.store.password=${config.keystorePassword}`,
+    `-Pandroid.injected.signing.key.alias=${config.keyAlias}`,
+    `-Pandroid.injected.signing.key.password=${config.keyPassword}`,
+  ]
+
+  const exitCode = await exec.exec('./gradlew', gradleArgs, {
+    cwd: config.androidDirectory,
+  })
+
+  if (exitCode !== 0) {
+    throw new Error(`Gradle build failed with exit code ${exitCode}`)
+  }
+
+  const aabPath = path.join(
+    config.androidDirectory,
+    'app/build/outputs/bundle/release/app-release.aab',
+  )
+  if (!existsSync(aabPath)) {
+    throw new Error(
+      `Build succeeded, but AAB file not found at expected path: ${aabPath}`,
     )
+  }
 
-    const aabPath: string = path.join(
-      androidDirectory,
-      'app/build/outputs/bundle/release/app-release.aab',
+  return aabPath
+}
+
+/**
+ * Handles the Google Play Developer API transaction.
+ */
+async function publishToGooglePlay(
+  config: ActionConfig,
+  aabPath: string,
+): Promise<void> {
+  core.info('Authenticating with Google Play...')
+  const credentials = JSON.parse(config.serviceAccountJson)
+  const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/androidpublisher'],
+  })
+
+  const androidPublisher = google.androidpublisher({ version: 'v3', auth })
+
+  core.info(`Starting upload transaction for ${config.packageName}...`)
+  const edit = await androidPublisher.edits.insert({
+    packageName: config.packageName,
+  })
+  const editId = edit.data.id
+
+  if (!editId) {
+    throw new Error(
+      'Failed to create an edit transaction. The API returned a null ID.',
     )
-    if (!fs.existsSync(aabPath)) {
-      throw new Error(`AAB file not found at expected path: ${aabPath}`)
-    }
+  }
 
-    core.info('Authenticating with Google Play...')
-    const credentials: Record<string, string> = JSON.parse(serviceAccountJson)
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/androidpublisher'],
-    })
-
-    const publisher = google.androidpublisher({ version: 'v3', auth })
-    core.info(`Starting upload for ${packageName}...`)
-    const edit = await publisher.edits.insert({ packageName })
-
-    const editId: string | null | undefined = edit.data.id
-    if (!editId) {
-      throw new Error(
-        'Failed to create an edit transaction. The Google Play API returned a null ID.',
-      )
-    }
-
-    const uploadResult = await publisher.edits.bundles.upload({
-      packageName,
+  try {
+    core.info('Uploading App Bundle...')
+    const uploadResult = await androidPublisher.edits.bundles.upload({
+      packageName: config.packageName,
       editId,
       media: {
         mimeType: 'application/octet-stream',
-        body: fs.createReadStream(aabPath),
+        // createReadStream is performant for large files as it streams chunks
+        body: createReadStream(aabPath),
       },
     })
 
-    const versionCode: number | null | undefined = uploadResult.data.versionCode
-    core.info(`Uploaded bundle with version code: ${versionCode}`)
+    const versionCode = uploadResult.data.versionCode
+    core.info(`Uploaded bundle successfully. Version code: ${versionCode}`)
 
-    await publisher.edits.tracks.update({
-      packageName,
+    core.info(
+      `Assigning release to ${config.track} track with status '${config.status}'...`,
+    )
+    await androidPublisher.edits.tracks.update({
+      packageName: config.packageName,
       editId,
-      track,
+      track: config.track,
       requestBody: {
         releases: [
           {
             versionCodes: [versionCode?.toString() || ''],
-            status: status,
+            status: config.status,
           },
         ],
       },
     })
 
     core.info('Committing changes to Google Play...')
-    await publisher.edits.commit({ packageName, editId })
-    core.info('Upload complete!')
+    await androidPublisher.edits.commit({
+      packageName: config.packageName,
+      editId,
+    })
+    core.info('Upload transaction complete!')
+  } catch (error) {
+    core.warning(
+      'An error occurred during the upload process. Attempting to clean up the orphaned edit transaction...',
+    )
+    // Attempt to delete the edit so it doesn't get stuck in the Google Play Console
+    try {
+      await androidPublisher.edits.delete({
+        packageName: config.packageName,
+        editId,
+      })
+      core.info('Cleaned up orphaned edit transaction.')
+    } catch {
+      core.error('Failed to clean up orphaned edit transaction.')
+    }
+    throw error // Re-throw the original error to fail the action
+  }
+}
+
+/**
+ * Securely deletes sensitive files.
+ */
+async function cleanupSecret(filePath: string): Promise<void> {
+  if (filePath && existsSync(filePath)) {
+    core.info(`Cleaning up temporary file: ${filePath}`)
+    await fs.unlink(filePath)
+  }
+}
+
+// --- Main Execution ---
+
+async function run(): Promise<void> {
+  let keystorePath = ''
+
+  try {
+    // 1. Validate
+    const config = getConfig()
+
+    // 2. Prepare
+    keystorePath = await setupKeystore(
+      config.androidDirectory,
+      config.keystoreBase64,
+    )
+
+    // 3. Execute Build
+    const aabPath = await buildAndSignAab(config, keystorePath)
+
+    // 4. Publish
+    await publishToGooglePlay(config, aabPath)
   } catch (error: unknown) {
     if (error instanceof Error) {
       core.setFailed(`Action failed: ${error.message}`)
@@ -110,9 +257,9 @@ export async function run(): Promise<void> {
       core.setFailed(`Action failed with an unknown error: ${String(error)}`)
     }
   } finally {
-    if (keystorePath && fs.existsSync(keystorePath)) {
-      core.info('Cleaning up keystore file...')
-      fs.unlinkSync(keystorePath)
-    }
+    // 5. Cleanup (Always executes)
+    await cleanupSecret(keystorePath)
   }
 }
+
+run()
