@@ -207,8 +207,8 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
       },
     })
 
-    const versionCode = uploadResult.data.versionCode
-    if (!versionCode) {
+    const versionCode: number | null | undefined = uploadResult.data.versionCode
+    if (versionCode == null) {
       throw new Error('Upload succeeded, but API returned a null version code.')
     }
 
@@ -288,7 +288,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
         core.info('Cleaned up orphaned edit transaction.')
       } catch (innerError) {
         core.error(
-          `Failed to clean up orphaned edit transaction. ${String(innerError)}`,
+          `Failed to clean up orphaned edit transaction: ${String(innerError)}`,
         )
       }
     }
@@ -308,8 +308,8 @@ async function cleanup(file: string): Promise<void> {
     try {
       await fs.unlink(file)
     } catch (error) {
-      const msg = error instanceof Error ? error.message : String(error)
-      core.error(`Failed to delete temporary file ${file}: ${msg}`)
+      const message = error instanceof Error ? error.message : String(error)
+      core.error(`Failed to delete temporary file ${file}: ${message}`)
     }
   }
 }
