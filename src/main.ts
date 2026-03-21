@@ -62,14 +62,16 @@ function getConfig(): ActionConfig {
   }
 
   if (!VALID_TRACKS.includes(config.track)) {
+    const valid = VALID_TRACKS.join(', ')
     throw new Error(
-      `Invalid track: '${config.track}'. Must be one of: ${VALID_TRACKS.join(', ')}`,
+      `Invalid track: '${config.track}'. Must be one of: ${valid}`,
     )
   }
 
   if (!VALID_STATUSES.includes(config.status)) {
+    const valid = VALID_STATUSES.join(', ')
     throw new Error(
-      `Invalid status: '${config.status}'. Must be one of: ${VALID_STATUSES.join(', ')}`,
+      `Invalid status: '${config.status}'. Must be one of: ${valid}`,
     )
   }
 
@@ -162,7 +164,8 @@ async function build(
 }
 
 /**
- * Handles the Google Play Developer API transaction for publishing the artifact and mapping file.
+ * Handles the Google Play Developer API transaction for publishing the artifact
+ * and mapping file.
  */
 async function publish(config: ActionConfig, artifact: string): Promise<void> {
   core.info('Authenticating with Google Play...')
@@ -184,7 +187,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
     editId = edit.data.id
 
     if (!editId) {
-      throw new Error('The API returned a null edit ID.')
+      throw new Error('The API did not return a valid edit ID.')
     }
   } catch (error) {
     throw new Error(
@@ -194,7 +197,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
   }
 
   try {
-    core.info('Uploading App Bundle...')
+    core.info('Uploading application bundle...')
     const uploadResult = await publisher.edits.bundles.upload({
       packageName: config.packageName,
       editId,
@@ -218,7 +221,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
     )
 
     if (existsSync(mappingPath)) {
-      core.info('Found mapping.txt! Uploading for crash deobfuscation...')
+      core.info('Found a mapping file! Uploading for crash deobfuscation...')
       await publisher.edits.deobfuscationfiles.upload({
         packageName: config.packageName,
         editId,
@@ -234,18 +237,17 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
       core.info('No mapping.txt found. Skipping deobfuscation file upload.')
     }
 
-    core.info(
-      `Assigning release to ${config.track} track with status '${config.status}'...`,
-    )
+    const { packageName, track, status } = config
+    core.info(`Assigning release to ${track} track with status '${status}'...`)
     await publisher.edits.tracks.update({
-      packageName: config.packageName,
+      packageName,
       editId,
-      track: config.track,
+      track: track,
       requestBody: {
         releases: [
           {
             versionCodes: [versionCode.toString()],
-            status: config.status,
+            status,
           },
         ],
       },
@@ -253,24 +255,27 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
 
     core.info('Committing changes to Google Play...')
     await publisher.edits.commit({
-      packageName: config.packageName,
+      packageName,
       editId,
     })
     core.info('Upload transaction complete!')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    // Check if the error is a Google API version code conflict.
     if (
+      typeof error === 'object' &&
       error.response &&
       error.response.status === 403 &&
       error.message.includes('already been used')
     ) {
       core.error(
-        '\n❌ VERSION CODE CONFLICT: The version code of this build already exists on Google Play. Please increment your version code and try again.\n',
+        '\n❌ VERSION CODE CONFLICT: The version code of this build already ' +
+          'exists on Google Play.Please increment your version code and try ' +
+          'again.\n',
       )
     } else {
       core.warning(
-        'An error occurred during the upload process. Attempting to clean up the orphaned edit transaction...',
+        'An error occurred during the upload process. Attempting to ' +
+          'clean up the orphaned edit transaction...',
       )
     }
 
@@ -281,9 +286,9 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
           editId,
         })
         core.info('Cleaned up orphaned edit transaction.')
-      } catch (cleanupError) {
+      } catch (innerError) {
         core.error(
-          `Failed to clean up orphaned edit transaction. ${String(cleanupError)}`,
+          `Failed to clean up orphaned edit transaction. ${String(innerError)}`,
         )
       }
     }
@@ -322,9 +327,8 @@ export async function run(): Promise<void> {
     await publish(config, artifact)
   } catch (error: unknown) {
     if (error instanceof Error) {
-      core.setFailed(
-        `Action failed: ${error.message}\nCause: ${error.cause ? String(error.cause) : 'N/A'}`,
-      )
+      const cause: string = error.cause ? String(error.cause) : 'N/A'
+      core.setFailed(`Action failed: ${error.message}\nCause: ${cause}`)
     } else {
       core.setFailed(`Action failed with an unknown error: ${String(error)}`)
     }
