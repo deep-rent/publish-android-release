@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "@actions/core": "^3.0.0",
-    "@actions/exec": "^3.0.0"
+    "@actions/exec": "^3.0.0",
+    "googleapis": "^171.4.0"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
