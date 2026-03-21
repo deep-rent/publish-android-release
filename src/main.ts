@@ -5,6 +5,30 @@ import { existsSync, createReadStream } from 'node:fs'
 import * as path from 'node:path'
 import { google } from 'googleapis'
 
+// --- Constants ---
+
+const INPUTS = {
+  ANDROID_DIR: 'androidDir',
+  KEYSTORE_BASE64: 'keystoreBase64',
+  KEYSTORE_PASSWORD: 'keystorePassword',
+  KEY_ALIAS: 'keyAlias',
+  KEY_PASSWORD: 'keyPassword',
+  SERVICE_ACCOUNT_JSON: 'serviceAccountJson',
+  PACKAGE_NAME: 'packageName',
+  TRACK: 'track',
+  STATUS: 'status',
+} as const
+
+const OUTPUTS = {
+  VERSION_CODE: 'versionCode',
+  AAB_PATH: 'aabPath',
+} as const
+
+const VALID_TRACKS = ['internal', 'alpha', 'beta', 'production']
+const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
+
+// --- Type Definitions ---
+
 interface ActionConfig {
   androidDir: string
   keystoreBase64: string
@@ -17,25 +41,26 @@ interface ActionConfig {
   status: string
 }
 
-const VALID_TRACKS = ['internal', 'alpha', 'beta', 'production']
-const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
+// --- Functions ---
 
 /**
  * Reads, parses, and validates all inputs from the GitHub Actions environment.
  */
 function getConfig(): ActionConfig {
   const config: ActionConfig = {
-    androidDir: core.getInput('androidDir', { required: true }),
-    keystoreBase64: core.getInput('keystoreBase64', { required: true }),
-    keystorePassword: core.getInput('keystorePassword', { required: true }),
-    keyAlias: core.getInput('keyAlias', { required: true }),
-    keyPassword: core.getInput('keyPassword', { required: true }),
-    serviceAccountJson: core.getInput('serviceAccountJson', {
+    androidDir: core.getInput(INPUTS.ANDROID_DIR, { required: true }),
+    keystoreBase64: core.getInput(INPUTS.KEYSTORE_BASE64, { required: true }),
+    keystorePassword: core.getInput(INPUTS.KEYSTORE_PASSWORD, {
       required: true,
     }),
-    packageName: core.getInput('packageName', { required: true }),
-    track: core.getInput('track', { required: true }),
-    status: core.getInput('status', { required: true }),
+    keyAlias: core.getInput(INPUTS.KEY_ALIAS, { required: true }),
+    keyPassword: core.getInput(INPUTS.KEY_PASSWORD, { required: true }),
+    serviceAccountJson: core.getInput(INPUTS.SERVICE_ACCOUNT_JSON, {
+      required: true,
+    }),
+    packageName: core.getInput(INPUTS.PACKAGE_NAME, { required: true }),
+    track: core.getInput(INPUTS.TRACK, { required: true }),
+    status: core.getInput(INPUTS.STATUS, { required: true }),
   }
 
   if (!existsSync(config.androidDir)) {
@@ -56,7 +81,7 @@ function getConfig(): ActionConfig {
   try {
     JSON.parse(config.serviceAccountJson)
   } catch {
-    throw new Error('serviceAccountJson is not valid JSON.')
+    throw new Error(`${INPUTS.SERVICE_ACCOUNT_JSON} is not valid JSON.`)
   }
 
   return config
@@ -125,6 +150,9 @@ async function build(
     )
   }
 
+  // Export the AAB path so other workflow steps can use it
+  core.setOutput(OUTPUTS.AAB_PATH, artifact)
+
   return artifact
 }
 
@@ -161,13 +189,17 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
       editId,
       media: {
         mimeType: 'application/octet-stream',
-        // createReadStream is performant for large files as it streams chunks
         body: createReadStream(artifact),
       },
     })
 
     const versionCode = uploadResult.data.versionCode
     core.info(`Uploaded bundle successfully. Version code: ${versionCode}`)
+
+    // Export the version code so other workflow steps can use it
+    if (versionCode) {
+      core.setOutput(OUTPUTS.VERSION_CODE, versionCode.toString())
+    }
 
     core.info(
       `Assigning release to ${config.track} track with status '${config.status}'...`,
@@ -196,7 +228,6 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
     core.warning(
       'An error occurred during the upload process. Attempting to clean up the orphaned edit transaction...',
     )
-    // Attempt to delete the edit so it doesn't get stuck.
     try {
       await androidPublisher.edits.delete({
         packageName: config.packageName,
@@ -206,7 +237,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
     } catch {
       core.error('Failed to clean up orphaned edit transaction.')
     }
-    throw error // Re-throw the original error to fail the action.
+    throw error
   }
 }
 
@@ -216,7 +247,14 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
 async function cleanupSecret(filePath: string): Promise<void> {
   if (filePath && existsSync(filePath)) {
     core.info(`Cleaning up temporary file: ${filePath}`)
-    await fs.unlink(filePath)
+    try {
+      await fs.unlink(filePath)
+    } catch (error) {
+      // Catch and log so it doesn't interrupt the rest of the failure cascade
+      core.error(
+        `Failed to delete temporary file ${filePath}: ${String(error)}`,
+      )
+    }
   }
 }
 
@@ -238,7 +276,6 @@ async function run(): Promise<void> {
       core.setFailed(`Action failed with an unknown error: ${String(error)}`)
     }
   } finally {
-    // 5. Cleanup (Always executes)
     await cleanupSecret(keystorePath)
   }
 }
