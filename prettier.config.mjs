@@ -8,7 +8,7 @@ const config = {
   jsxSingleQuote: false,
   printWidth: 80,
   proseWrap: "always",
-  quoteProps: "as-needed",
+  quoteProps: "consistent",
   semi: false,
   singleQuote: true,
   tabWidth: 2,
