@@ -1,19 +1,19 @@
 /** @type {import("prettier").Config} */
 const config = {
-  arrowParens: "always",
+  arrowParens: 'always',
   bracketSameLine: true,
   bracketSpacing: true,
-  endOfLine: "lf",
-  htmlWhitespaceSensitivity: "css",
+  endOfLine: 'lf',
+  htmlWhitespaceSensitivity: 'css',
   jsxSingleQuote: false,
   printWidth: 80,
-  proseWrap: "always",
-  quoteProps: "consistent",
+  proseWrap: 'always',
+  quoteProps: 'consistent',
   semi: false,
   singleQuote: true,
   tabWidth: 2,
-  trailingComma: "all",
+  trailingComma: 'all',
   useTabs: false,
-};
+}
 
-export default config;
+export default config
