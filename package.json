@@ -2,6 +2,7 @@
   "name": "publish-android-release",
   "version": "0.0.1",
   "description": "GitHub Action for uploading Android artifacts to the Google Play Console.",
+  "private": true,
   "homepage": "https://github.com/deep-rent/publish-android-release#readme",
   "bugs": {
     "url": "https://github.com/deep-rent/publish-android-release/issues"
