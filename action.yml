@@ -23,7 +23,7 @@ inputs:
   keyPassword:
     description: 'Key password'
     required: true
-  serviceAccountJsonPlainText:
+  serviceAccountJson:
     description: 'The plain text of the service account JSON'
     required: true
   packageName:
