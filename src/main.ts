@@ -1,2 +1,1 @@
-export async function run(): Promise<void> {
-}
+export async function run(): Promise<void> {}
