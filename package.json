@@ -29,5 +29,8 @@
   },
   "dependencies": {
     "@actions/core": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0"
   }
 }
