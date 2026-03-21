@@ -1,35 +1,24 @@
-import { FlatCompat } from '@eslint/eslintrc'
+// @ts-check
 import js from '@eslint/js'
-import ts from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import tseslint from 'typescript-eslint'
 import jest from 'eslint-plugin-jest'
-import prettier from 'eslint-plugin-prettier'
+import prettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
-
-export default [
+export default tseslint.config(
+  // 1. Global Ignores
   {
     ignores: ['coverage/**', 'dist/**', 'node_modules/**'],
   },
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:jest/recommended',
-    'plugin:prettier/recommended',
-  ),
-  {
-    plugins: {
-      jest,
-      prettier,
-      '@typescript-eslint': ts,
-    },
 
+  // 2. Base Configurations
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  jest.configs['flat/recommended'],
+  prettierRecommended,
+
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.mjs'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -37,11 +26,6 @@ export default [
         Atomics: 'readonly',
         SharedArrayBuffer: 'readonly',
       },
-
-      parser: tsParser,
-      ecmaVersion: 2023,
-      sourceType: 'module',
-
       parserOptions: {
         projectService: {
           allowDefaultProject: [
@@ -53,15 +37,6 @@ export default [
           ],
         },
         tsconfigRootDir: import.meta.dirname,
-      },
-    },
-
-    settings: {
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: 'tsconfig.json',
-        },
       },
     },
 
@@ -77,4 +52,4 @@ export default [
       'prettier/prettier': 'error',
     },
   },
-]
+)
