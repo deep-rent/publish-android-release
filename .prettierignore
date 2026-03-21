@@ -9,3 +9,7 @@
 !**/*.ts
 !**/*.yaml
 !**/*.yml
+
+coverage/
+dist/
+node_modules/
