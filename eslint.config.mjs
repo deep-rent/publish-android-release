@@ -33,6 +33,7 @@ export default tseslint.config(
             '__tests__/*.ts',
             'eslint.config.mjs',
             'jest.config.js',
+            'prettier.config.mjs',
             'rollup.config.ts',
           ],
         },
