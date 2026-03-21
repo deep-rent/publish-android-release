@@ -25,7 +25,7 @@ const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
  */
 function getConfig(): ActionConfig {
   const config: ActionConfig = {
-    androidDir: core.getInput('androidDirectory', { required: true }),
+    androidDir: core.getInput('androidDir', { required: true }),
     keystoreBase64: core.getInput('keystoreBase64', { required: true }),
     keystorePassword: core.getInput('keystorePassword', { required: true }),
     keyAlias: core.getInput('keyAlias', { required: true }),

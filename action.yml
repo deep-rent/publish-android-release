@@ -7,7 +7,7 @@ branding:
   color: green
 
 inputs:
-  androidDirectory:
+  androidDir:
     description: 'Path to the Android folder containing gradlew'
     required: true
     default: '.'
