@@ -1,0 +1,20 @@
+{
+  "name": "publish-android-release",
+  "version": "0.0.1",
+  "description": "GitHub Action for uploading Android artifacts to the Google Play Console.",
+  "homepage": "https://github.com/deep-rent/publish-android-release#readme",
+  "bugs": {
+    "url": "https://github.com/deep-rent/publish-android-release/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deep-rent/publish-android-release.git"
+  },
+  "license": "MIT",
+  "author": "deep.rent GmbH",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
