@@ -14,6 +14,9 @@
   "license": "MIT",
   "author": "deep.rent GmbH",
   "type": "module",
+  "keywords": [
+    "actions"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
