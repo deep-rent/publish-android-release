@@ -1,0 +1,14 @@
+name: Publish Android Release
+description: Uploads an Android release artifact to the Google Play Console
+author: deep.rent GmbH
+
+branding:
+  icon: upload
+  color: green
+
+inputs: {}
+outputs: {}
+
+runs:
+  using: node24
+  main: dist/index.js
