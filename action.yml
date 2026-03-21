@@ -6,7 +6,37 @@ branding:
   icon: upload
   color: green
 
-inputs: {}
+inputs:
+  androidDirectory:
+    description: 'Path to the Android folder containing gradlew'
+    required: true
+    default: '.'
+  keystoreBase64:
+    description: 'Base64 encoded keystore file'
+    required: true
+  keystorePassword:
+    description: 'Keystore password'
+    required: true
+  keyAlias:
+    description: 'Key alias'
+    required: true
+  keyPassword:
+    description: 'Key password'
+    required: true
+  serviceAccountJsonPlainText:
+    description: 'The plain text of the service account JSON'
+    required: true
+  packageName:
+    description: 'The package name of the app'
+    required: true
+  track:
+    description: 'The track to promote to'
+    required: true
+    default: 'internal'
+  status:
+    description: 'Release status (e.g., completed, draft, halted, inProgress)'
+    required: true
+    default: 'completed'
 outputs: {}
 
 runs:
