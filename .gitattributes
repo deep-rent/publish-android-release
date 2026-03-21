@@ -1,0 +1,11 @@
+*          text=auto
+*.bat      text eol=crlf
+*.json     text
+*.md       text diff=markdown
+*.sh       text eol=lf
+*.svg      text
+*.yaml     text
+*.yml      text
+go.mod     text
+go.sum     text
+LICENSE    text
