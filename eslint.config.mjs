@@ -32,7 +32,7 @@ export default tseslint.config(
             '__fixtures__/*.ts',
             '__tests__/*.ts',
             'eslint.config.mjs',
-            'jest.config.js',
+            'jest.config.ts',
             'prettier.config.mjs',
             'rollup.config.ts',
           ],
