@@ -6,6 +6,7 @@
 *.svg      text
 *.yaml     text
 *.yml      text
+dist/**    -diff linguist-generated=true
 go.mod     text
 go.sum     text
 LICENSE    text
