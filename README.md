@@ -1,5 +1,6 @@
 # publish-android-release
 
+[![Build](https://github.com/deep-rent/publish-android-release/actions/workflows/build.yml/badge.svg)](https://github.com/deep-rent/publish-android-release/actions/workflows/build.yml)
 ![Coverage](.github/assets/coverage.svg)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
