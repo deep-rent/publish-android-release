@@ -3,10 +3,11 @@ import * as exec from '@actions/exec'
 import * as fs from 'node:fs/promises'
 import { existsSync, createReadStream } from 'node:fs'
 import * as path from 'node:path'
+import * as os from 'node:os'
 import { google } from 'googleapis'
 
 const INPUTS = {
-  PROJECT_DIR: 'projectDir',
+  ANDROID_DIR: 'androidDir',
   KEYSTORE_BASE64: 'keystoreBase64',
   KEYSTORE_PASSWORD: 'keystorePassword',
   KEY_ALIAS: 'keyAlias',
@@ -26,7 +27,7 @@ const VALID_TRACKS = ['internal', 'alpha', 'beta', 'production']
 const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
 
 interface ActionConfig {
-  projectDir: string
+  androidDir: string
   keystoreBase64: string
   keystorePassword: string
   keyAlias: string
@@ -42,7 +43,7 @@ interface ActionConfig {
  */
 function getConfig(): ActionConfig {
   const config: ActionConfig = {
-    projectDir: core.getInput(INPUTS.PROJECT_DIR, { required: true }),
+    androidDir: core.getInput(INPUTS.ANDROID_DIR, { required: true }),
     keystoreBase64: core.getInput(INPUTS.KEYSTORE_BASE64, { required: true }),
     keystorePassword: core.getInput(INPUTS.KEYSTORE_PASSWORD, {
       required: true,
@@ -57,8 +58,8 @@ function getConfig(): ActionConfig {
     status: core.getInput(INPUTS.STATUS, { required: true }),
   }
 
-  if (!existsSync(config.projectDir)) {
-    throw new Error(`Project directory not found: ${config.projectDir}`)
+  if (!existsSync(config.androidDir)) {
+    throw new Error(`Android directory not found: ${config.androidDir}`)
   }
 
   if (!VALID_TRACKS.includes(config.track)) {
@@ -90,12 +91,9 @@ function getConfig(): ActionConfig {
  * Decodes the Base64-encoded keystore and writes it to disk.
  * Returns the absolute path to the decoded file.
  */
-async function createKeystore(
-  projectDir: string,
-  base64Data: string,
-): Promise<string> {
+async function createKeystore(base64Data: string): Promise<string> {
   core.info('Decoding and saving keystore securely...')
-  const keystorePath = path.join(projectDir, 'temp_release.keystore')
+  const keystorePath = path.join(os.tmpdir(), `release_${Date.now()}.keystore`)
 
   try {
     const keystoreBuffer = Buffer.from(base64Data, 'base64')
@@ -115,7 +113,7 @@ async function build(
   keystorePath: string,
 ): Promise<string> {
   core.info('Building and signing the AAB...')
-  const gradlewPath = path.join(config.projectDir, 'gradlew')
+  const gradlewPath = path.join(config.androidDir, 'gradlew')
 
   if (!existsSync(gradlewPath)) {
     throw new Error(`gradlew executable not found at ${gradlewPath}`)
@@ -137,7 +135,7 @@ async function build(
 
   try {
     const exitCode = await exec.exec('./gradlew', gradleArgs, {
-      cwd: config.projectDir,
+      cwd: config.androidDir,
     })
 
     if (exitCode !== 0) {
@@ -148,7 +146,7 @@ async function build(
   }
 
   const artifact = path.join(
-    config.projectDir,
+    config.androidDir,
     'app/build/outputs/bundle/release/app-release.aab',
   )
 
@@ -216,7 +214,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
     core.setOutput(OUTPUTS.VERSION_CODE, versionCode.toString())
 
     const mappingPath = path.join(
-      config.projectDir,
+      config.androidDir,
       'app/build/outputs/mapping/release/mapping.txt',
     )
 
@@ -303,10 +301,10 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
  * Securely deletes sensitive files.
  */
 async function cleanup(file: string): Promise<void> {
-  if (file && existsSync(file)) {
+  if (file) {
     core.info(`Cleaning up temporary file: ${file}`)
     try {
-      await fs.unlink(file)
+      await fs.rm(file, { force: true })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       core.error(`Failed to delete temporary file ${file}: ${message}`)
@@ -319,10 +317,7 @@ export async function run(): Promise<void> {
 
   try {
     const config = getConfig()
-    keystorePath = await createKeystore(
-      config.projectDir,
-      config.keystoreBase64,
-    )
+    keystorePath = await createKeystore(config.keystoreBase64)
     const artifact = await build(config, keystorePath)
     await publish(config, artifact)
   } catch (error: unknown) {
