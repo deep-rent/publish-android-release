@@ -6,7 +6,6 @@ labels: bug, needs triage
 assignees: ''
 
 ---
-
 <!--- Before opening up a new bug report, please make sure to check for similar existing issues. -->
 
 **Description:**
