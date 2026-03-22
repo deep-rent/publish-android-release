@@ -48,7 +48,7 @@ jobs:
           key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
           key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
           service-account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          track: internal
+          track: production
           status: completed
 ```
 
@@ -56,19 +56,19 @@ jobs:
 
 Configure these parameters to customize how the action builds and signs your application:
 
-| Name | Required | Default | Description |
-|------|:--------:|---------|-------------|
-| `project-directory` | No | `.` | Path to the root Android project directory containing the `gradlew` executable. |
-| `keystore` | **Yes** | | Base64-encoded string representation of your Android release keystore (`.jks` or `.keystore`) file. |
-| `keystore-password` | **Yes** | | The password required to unlock the Android keystore. |
-| `key-alias` | **Yes** | | The alias of the signing key stored within the keystore. |
-| `key-password` | **Yes** | | The password for the specific signing key alias. |
-| `service-account` | **Yes** | | The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API. |
-| `package-name` | **Yes** | | The application ID (package name) of the Android app (e.g., `com.example.app`). |
-| `release-file` | No | | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
-| `mapping-file` | No | | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
-| `track` | No | `internal` | The Google Play track to publish the release to. Valid options: `internal`, `alpha`, `beta`, `production`. |
-| `status` | No | `completed` | The status of the release. Valid options: `completed`, `draft`, `halted`, `inProgress`. |
+| Name | Required | Description |
+|------|:--------:|-------------|
+| `project-directory` | No | Path to the root Android project directory containing the `gradlew` executable.<br><br>**Default:** `.` |
+| `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks` or `.keystore`) file. |
+| `keystore-password` | Yes | The password required to unlock the Android keystore. |
+| `key-alias` | Yes | The alias of the signing key stored within the keystore. |
+| `key-password` | Yes | The password for the specific signing key alias. |
+| `service-account` | Yes | The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API. |
+| `package-name` | Yes | The application ID (package name) of the Android app (e.g., `com.example.app`). |
+| `release-file` | No | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
+| `mapping-file` | No | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
+| `track` | No | The Google Play track to publish the release to. Valid options: `internal`, `alpha`, `beta`, `production`.<br><br>**Default:** `internal` |
+| `status` | No | The status of the release. Valid options: `completed`, `draft`, `halted`, `inProgress`.<br><br>**Default:** `completed` |
 
 ## Outputs
 
@@ -103,4 +103,4 @@ base64 -w 0 my-release-key.jks > encoded.txt
 
 This project is open-source and available under the **MIT License**.
 
-Feel free to use, modify, and distribute the code however you like! If you're curious about the specifics, you can find all the legal bits in the LICENSE file.
+Feel free to use, modify, and distribute the code however you like! If you're curious about the specifics, you can find all the legal bits in the `LICENSE` file.
