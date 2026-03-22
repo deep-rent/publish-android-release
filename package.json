@@ -22,6 +22,7 @@
     ".": "./dist/index.js"
   },
   "scripts": {
+    "bundle": "npm run format:write && npm run package",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
