@@ -13,6 +13,10 @@ const config = {
     inlineDynamicImports: true,
     sourcemap: true,
   },
+  treeshake: {
+    moduleSideEffects: 'no-external',
+    propertyReadSideEffects: false,
+  },
   plugins: [
     nodeResolve({ preferBuiltins: true }),
     commonjs(),
