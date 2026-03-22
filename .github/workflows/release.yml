@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
+      # - name: Update Floating Major Tag
+      #   run: |
+      #     # Extract the major version from the tag (e.g., v1 from v1.2.3)
+      #     MAJOR_VERSION=$(echo ${GITHUB_REF_NAME} | cut -d. -f1)
+
+      #     # Configure Git to act as the GitHub Actions bot
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      #     # Force update the major tag to point to the current commit and push
+      #     git tag -f $MAJOR_VERSION
+      #     git push -f origin $MAJOR_VERSION
