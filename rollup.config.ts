@@ -19,15 +19,20 @@ const config: RollupOptions = {
     propertyReadSideEffects: false,
   },
   plugins: [
+    // @ts-expect-error - Plugin types are not callable in NodeNext.
     nodeResolve({ preferBuiltins: true }),
+    // @ts-expect-error - Plugin types are not callable in NodeNext.
     commonjs(),
+    // @ts-expect-error - Plugin types are not callable in NodeNext.
     json(),
+    // @ts-expect-error - Plugin types are not callable in NodeNext.
     typescript({
       compilerOptions: {
         moduleResolution: 'bundler',
         module: 'ESNext',
       },
     }),
+    // @ts-expect-error - Plugin types are not callable in NodeNext.
     terser({
       maxWorkers: 4,
       compress: {
@@ -36,6 +41,15 @@ const config: RollupOptions = {
       },
     }),
   ],
+  onwarn: (warning, warn) => {
+    if (
+      warning.code === 'THIS_IS_UNDEFINED' ||
+      warning.code === 'CIRCULAR_DEPENDENCY'
+    ) {
+      return
+    }
+    warn(warning)
+  },
 }
 
 export default config
