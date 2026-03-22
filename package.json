@@ -1,7 +1,7 @@
 {
   "name": "publish-android-release",
   "version": "0.0.1",
-  "description": "GitHub Action for uploading Android artifacts to the Google Play Console.",
+  "description": "GitHub Action for building, signing, and uploading Android App Bundle (AAB) artifacts to the Google Play Console.",
   "license": "MIT",
   "author": "deep.rent GmbH",
   "private": true,
