@@ -59,7 +59,13 @@ describe('config', () => {
   })
 
   it('throws an error if an invalid track is provided', () => {
-    ;(core.getInput as jest.Mock).mockReturnValueOnce('invalid-track')
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.TRACK) return 'invalid-track'
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.STATUS) return 'completed'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
     expect(() => getConfig()).toThrow(/Invalid track: 'invalid-track'/)
   })
 
@@ -75,7 +81,10 @@ describe('config', () => {
 
   it('throws an error if the service account is not valid JSON', () => {
     ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
-      return name === INPUTS.SERVICE_ACCOUNT ? 'not-json' : 'val'
+      if (name === INPUTS.SERVICE_ACCOUNT) return 'not-json'
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'completed'
+      return 'val'
     })
     expect(() => getConfig()).toThrow(/is not valid JSON/)
   })
