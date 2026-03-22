@@ -37,7 +37,7 @@ jobs:
         id: initialize
         uses: github/codeql-action/init@v4
         with:
-          config-file: .github/codeql/config.yml
+          config-file: .github/codeql.yml
           languages: ${{ matrix.language }}
           source-root: src
 
