@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "src",
+    "__tests__",
+    "__fixtures__",
+    "jest.config.ts",
+    "rollup.config.ts"
+  ],
+  "exclude": ["node_modules", "dist", "coverage"]
+}
