@@ -21,6 +21,9 @@ export default {
   // },
   extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'js'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   preset: 'ts-jest',
   reporters: ['default'],
   resolver: 'ts-jest-resolver',
