@@ -11,6 +11,9 @@ const config: RollupOptions = {
     esModule: true,
     file: 'dist/index.js',
     format: 'es',
+    generatedCode: {
+      constBindings: true,
+    },
     inlineDynamicImports: true,
     sourcemap: false,
   },
