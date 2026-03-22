@@ -10,10 +10,10 @@ A GitHub Action that automatically builds, signs, and uploads an Android App Bun
 Explore the core capabilities that make this action a powerful tool for your deployment workflow:
 
 - Builds your Android project using Gradle.
-- Securely signs the generated AAB using a Base64-encoded keystore.
+- Securely signs the generated AAB using your release keystore.
 - Uploads the signed AAB to the Google Play Console via the Google Play Developer API.
-- Automatically uploads ProGuard/R8 mapping files for crash deobfuscation if found.
-- Supports specifying the deployment track (`internal`, `alpha`, `beta`, `production`) and status.
+- Automatically includes ProGuard/R8 mapping files for crash deobfuscation if found.
+- Supports specifying the deployment track and status.
 
 ## Usage
 
