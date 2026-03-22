@@ -2,9 +2,10 @@
 
 ![Coverage](.github/assets/coverage.svg)
 
-A GitHub Action that automatically builds, signs, and uploads an Android App Bundle (AAB) to the Google Play Console. This action streamlines your CI/CD pipeline by handling the entire Android release process, including optional ProGuard/R8 mapping file uploads for crash deobfuscation.
+A GitHub Action that automatically builds, signs, and uploads an Android App Bundle (AAB) to the Google Play Console. Originally created for Capacitor apps, this action streamlines your CI/CD pipeline by handling the entire Android release process for any Android project, including optional ProGuard/R8 mapping file uploads for crash deobfuscation.
 
 ## Features
+
 - Builds your Android project using Gradle.
 - Securely signs the generated AAB using a Base64-encoded keystore.
 - Uploads the signed AAB to the Google Play Console via the Google Play Developer API.
@@ -58,15 +59,10 @@ jobs:
 | `key-password` | **Yes** | | The password for the specific signing key alias. |
 | `service-account` | **Yes** | | The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API. |
 | `package-name` | **Yes** | | The application ID (package name) of the Android app (e.g., `com.example.app`). |
-| `release-file` | No | `* ` (see below) | The relative path to the generated Android App Bundle (AAB) file. |
-| `mapping-file` | No | `**` (see below) | The relative path to the generated ProGuard/R8 `mapping.txt` file. |
+| `release-file` | No | | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
+| `mapping-file` | No | | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
 | `track` | No | `internal` | The Google Play track to publish the release to. Valid options: `internal`, `alpha`, `beta`, `production`. |
 | `status` | No | `completed` | The status of the release. Valid options: `completed`, `draft`, `halted`, `inProgress`. |
-
-```
-*    app/build/outputs/bundle/release/app-release.aab
-**   app/build/outputs/mapping/release/mapping.txt
-```
 
 ## Outputs
 
@@ -77,16 +73,24 @@ jobs:
 
 ## Prerequisites
 
-1. **Google Play Service Account**: You must create a Service Account in Google Cloud Console, grant it permissions in the Google Play Console, and generate a JSON key. Store the raw JSON content as a GitHub Secret.
-2. **Base64 Keystore**: Encode your release `.jks` or `.keystore` file to Base64 and store it as a GitHub Secret.
-   ```bash
-   # macOS
-   base64 -i my-release-key.jks | pbcopy
+### 1. Google Play Service Account
 
-   # Linux
-   base64 -w 0 my-release-key.jks > encoded.txt
-   ```
+You must create a Service Account in the Google Cloud Console, grant it the necessary permissions in the Google Play Console, and generate a JSON key. Store the raw JSON content as a GitHub Secret.
+
+### 2. Base64 Keystore
+
+Encode your release `.jks` or `.keystore` file to Base64 and store it as a GitHub Secret.
+
+```bash
+# macOS
+base64 -i my-release-key.jks | pbcopy
+
+# Linux
+base64 -w 0 my-release-key.jks > encoded.txt
+```
 
 ## License
 
-MIT License - Copyright (c) 2026 deep.rent GmbH (https://deep.rent)
+This project is open-source and available under the **MIT License**.
+
+Feel free to use, modify, and distribute the code however you like! If you're curious about the specifics, you can find all the legal bits in the LICENSE file.
