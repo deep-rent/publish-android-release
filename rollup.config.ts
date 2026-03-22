@@ -3,14 +3,14 @@
  * Licensed under the MIT License.
  */
 
-import type { RollupOptions } from 'rollup'
+import { defineConfig } from 'rollup'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import nodeResolve from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
 import typescript from '@rollup/plugin-typescript'
 
-const config: RollupOptions = {
+export default defineConfig({
   input: 'src/index.ts',
   output: {
     esModule: true,
@@ -63,6 +63,4 @@ const config: RollupOptions = {
     }
     warn(warning)
   },
-}
-
-export default config
+})
