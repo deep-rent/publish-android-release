@@ -13,6 +13,7 @@ const config: RollupOptions = {
     format: 'es',
     generatedCode: {
       constBindings: true,
+      arrowFunctions: true,
     },
     inlineDynamicImports: true,
     sourcemap: false,
