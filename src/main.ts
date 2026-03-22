@@ -7,32 +7,32 @@ import * as os from 'node:os'
 import { google } from 'googleapis'
 
 const INPUTS = {
-  ANDROID_DIR: 'androidDir',
-  KEYSTORE_BASE64: 'keystoreBase64',
-  KEYSTORE_PASSWORD: 'keystorePassword',
-  KEY_ALIAS: 'keyAlias',
-  KEY_PASSWORD: 'keyPassword',
-  SERVICE_ACCOUNT_JSON: 'serviceAccountJson',
-  PACKAGE_NAME: 'packageName',
+  PROJECT_DIRECTORY: 'project-directory',
+  KEYSTORE: 'keystore',
+  KEYSTORE_PASSWORD: 'keystore-password',
+  KEY_ALIAS: 'key-alias',
+  KEY_PASSWORD: 'key-password',
+  SERVICE_ACCOUNT: 'service-account',
+  PACKAGE_NAME: 'package-name',
   TRACK: 'track',
   STATUS: 'status',
 } as const
 
 const OUTPUTS = {
-  VERSION_CODE: 'versionCode',
-  ARTIFACT: 'artifact',
+  VERSION_CODE: 'version-code',
+  AAB_PATH: 'aab-path',
 } as const
 
 const VALID_TRACKS = ['internal', 'alpha', 'beta', 'production']
 const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
 
 interface ActionConfig {
-  androidDir: string
-  keystoreBase64: string
+  projectDirectory: string
+  keystore: string
   keystorePassword: string
   keyAlias: string
   keyPassword: string
-  serviceAccountJson: string
+  serviceAccount: string
   packageName: string
   track: string
   status: string
@@ -43,23 +43,37 @@ interface ActionConfig {
  */
 function getConfig(): ActionConfig {
   const config: ActionConfig = {
-    androidDir: core.getInput(INPUTS.ANDROID_DIR, { required: true }),
-    keystoreBase64: core.getInput(INPUTS.KEYSTORE_BASE64, { required: true }),
+    projectDirectory: core.getInput(INPUTS.PROJECT_DIRECTORY, {
+      required: true,
+    }),
+    keystore: core.getInput(INPUTS.KEYSTORE, {
+      required: true,
+    }),
     keystorePassword: core.getInput(INPUTS.KEYSTORE_PASSWORD, {
       required: true,
     }),
-    keyAlias: core.getInput(INPUTS.KEY_ALIAS, { required: true }),
-    keyPassword: core.getInput(INPUTS.KEY_PASSWORD, { required: true }),
-    serviceAccountJson: core.getInput(INPUTS.SERVICE_ACCOUNT_JSON, {
+    keyAlias: core.getInput(INPUTS.KEY_ALIAS, {
       required: true,
     }),
-    packageName: core.getInput(INPUTS.PACKAGE_NAME, { required: true }),
-    track: core.getInput(INPUTS.TRACK, { required: true }),
-    status: core.getInput(INPUTS.STATUS, { required: true }),
+    keyPassword: core.getInput(INPUTS.KEY_PASSWORD, {
+      required: true,
+    }),
+    serviceAccount: core.getInput(INPUTS.SERVICE_ACCOUNT, {
+      required: true,
+    }),
+    packageName: core.getInput(INPUTS.PACKAGE_NAME, {
+      required: true,
+    }),
+    track: core.getInput(INPUTS.TRACK, {
+      required: true,
+    }),
+    status: core.getInput(INPUTS.STATUS, {
+      required: true,
+    }),
   }
 
-  if (!existsSync(config.androidDir)) {
-    throw new Error(`Android directory not found: ${config.androidDir}`)
+  if (!existsSync(config.projectDirectory)) {
+    throw new Error(`Android directory not found: ${config.projectDirectory}`)
   }
 
   if (!VALID_TRACKS.includes(config.track)) {
@@ -77,9 +91,9 @@ function getConfig(): ActionConfig {
   }
 
   try {
-    JSON.parse(config.serviceAccountJson)
-  } catch (error) {
-    throw new Error(`${INPUTS.SERVICE_ACCOUNT_JSON} is not valid JSON.`, {
+    JSON.parse(config.serviceAccount)
+  } catch (error: unknown) {
+    throw new Error(`${INPUTS.SERVICE_ACCOUNT} is not valid JSON.`, {
       cause: error,
     })
   }
@@ -99,7 +113,7 @@ async function createKeystore(base64Data: string): Promise<string> {
     const keystoreBuffer = Buffer.from(base64Data, 'base64')
     await fs.writeFile(keystorePath, keystoreBuffer)
     return keystorePath
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error('Failed to decode and save keystore', { cause: error })
   }
 }
@@ -113,16 +127,23 @@ async function build(
   keystorePath: string,
 ): Promise<string> {
   core.info('Building and signing the AAB...')
-  const gradlewPath = path.join(config.androidDir, 'gradlew')
+  const isWindows = os.platform() === 'win32'
+
+  const gradlewPath = path.resolve(
+    config.projectDirectory,
+    isWindows ? 'gradlew.bat' : 'gradlew',
+  )
 
   if (!existsSync(gradlewPath)) {
-    throw new Error(`gradlew executable not found at ${gradlewPath}`)
+    throw new Error(`Gradle wrapper not found at ${gradlewPath}`)
   }
 
-  try {
-    await fs.chmod(gradlewPath, '755')
-  } catch (error) {
-    throw new Error(`Failed to make gradlew executable`, { cause: error })
+  if (!isWindows) {
+    try {
+      await fs.chmod(gradlewPath, 0o755)
+    } catch (error: unknown) {
+      throw new Error(`Failed to make gradlew executable`, { cause: error })
+    }
   }
 
   const gradleArgs = [
@@ -134,74 +155,73 @@ async function build(
   ]
 
   try {
-    const exitCode = await exec.exec('./gradlew', gradleArgs, {
-      cwd: config.androidDir,
+    const exitCode: number = await exec.exec(gradlewPath, gradleArgs, {
+      cwd: config.projectDirectory,
     })
 
     if (exitCode !== 0) {
       throw new Error(`Gradle build failed with exit code ${exitCode}`)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(`Failed to execute Gradle build`, { cause: error })
   }
 
-  const artifact = path.join(
-    config.androidDir,
+  const aabPath = path.join(
+    config.projectDirectory,
     'app/build/outputs/bundle/release/app-release.aab',
   )
 
-  if (!existsSync(artifact)) {
+  if (!existsSync(aabPath)) {
     throw new Error(
-      `Build succeeded, but AAB file not found at expected path: ${artifact}`,
+      `Build succeeded, but AAB file not found at expected path: ${aabPath}`,
     )
   }
 
-  core.setOutput(OUTPUTS.ARTIFACT, artifact)
+  core.setOutput(OUTPUTS.AAB_PATH, aabPath)
 
-  return artifact
+  return aabPath
 }
 
 /**
  * Handles the Google Play Developer API transaction for publishing the artifact
  * and mapping file.
  */
-async function publish(config: ActionConfig, artifact: string): Promise<void> {
+async function publish(config: ActionConfig, aabPath: string): Promise<void> {
   core.info('Authenticating with Google Play...')
-  const credentials = JSON.parse(config.serviceAccountJson)
+  const credentials = JSON.parse(config.serviceAccount)
   const auth = new google.auth.GoogleAuth({
     credentials,
     scopes: ['https://www.googleapis.com/auth/androidpublisher'],
   })
 
   const publisher = google.androidpublisher({ version: 'v3', auth })
+  const { packageName, track, status } = config
 
-  core.info(`Starting upload transaction for ${config.packageName}...`)
+  core.info(`Starting upload transaction for ${packageName}...`)
   let editId: string | null | undefined
-
   try {
-    const edit = await publisher.edits.insert({
-      packageName: config.packageName,
-    })
+    const edit = await publisher.edits.insert({ packageName })
     editId = edit.data.id
 
     if (!editId) {
-      throw new Error('The API did not return a valid edit ID.')
+      throw new Error(
+        'The Google Developer API did not return a valid edit ID.',
+      )
     }
-  } catch (error) {
-    throw new Error(
-      `Failed to create an edit transaction for ${config.packageName}`,
-      { cause: error },
-    )
+  } catch (error: unknown) {
+    throw new Error(`Failed to create an edit transaction for ${packageName}`, {
+      cause: error,
+    })
   }
 
   try {
     core.info('Uploading application bundle...')
     const uploadResult = await publisher.edits.bundles.upload({
-      packageName: config.packageName,
+      packageName,
       editId,
       media: {
         mimeType: 'application/octet-stream',
-        body: createReadStream(artifact),
+        body: createReadStream(aabPath),
       },
     })
 
@@ -214,7 +234,7 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
     core.setOutput(OUTPUTS.VERSION_CODE, versionCode.toString())
 
     const mappingPath = path.join(
-      config.androidDir,
+      config.projectDirectory,
       'app/build/outputs/mapping/release/mapping.txt',
     )
 
@@ -235,7 +255,6 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
       core.info('No mapping.txt found. Skipping deobfuscation file upload.')
     }
 
-    const { packageName, track, status } = config
     core.info(`Assigning release to ${track} track with status '${status}'...`)
     await publisher.edits.tracks.update({
       packageName,
@@ -257,17 +276,19 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
       editId,
     })
     core.info('Upload transaction complete!')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const apiError = error as {
+      response?: { status?: number }
+      message?: string
+    }
+
     if (
-      typeof error === 'object' &&
-      error.response &&
-      error.response.status === 403 &&
-      error.message.includes('already been used')
+      apiError.response?.status === 403 &&
+      apiError.message?.includes('already been used')
     ) {
       core.error(
         '\n❌ VERSION CODE CONFLICT: The version code of this build already ' +
-          'exists on Google Play.Please increment your version code and try ' +
+          'exists on Google Play. Please increment your version code and try ' +
           'again.\n',
       )
     } else {
@@ -284,9 +305,9 @@ async function publish(config: ActionConfig, artifact: string): Promise<void> {
           editId,
         })
         core.info('Cleaned up orphaned edit transaction.')
-      } catch (innerError) {
+      } catch (cleanError: unknown) {
         core.error(
-          `Failed to clean up orphaned edit transaction: ${String(innerError)}`,
+          `Failed to clean up orphaned edit transaction: ${String(cleanError)}`,
         )
       }
     }
@@ -305,7 +326,7 @@ async function cleanup(file: string): Promise<void> {
     core.info(`Cleaning up temporary file: ${file}`)
     try {
       await fs.rm(file, { force: true })
-    } catch (error) {
+    } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)
       core.error(`Failed to delete temporary file ${file}: ${message}`)
     }
@@ -313,17 +334,16 @@ async function cleanup(file: string): Promise<void> {
 }
 
 export async function run(): Promise<void> {
-  let keystorePath = ''
+  let keystorePath: string = ''
 
   try {
-    const config = getConfig()
-    keystorePath = await createKeystore(config.keystoreBase64)
-    const artifact = await build(config, keystorePath)
-    await publish(config, artifact)
+    const config: ActionConfig = getConfig()
+    keystorePath = await createKeystore(config.keystore)
+    const aabPath: string = await build(config, keystorePath)
+    await publish(config, aabPath)
   } catch (error: unknown) {
     if (error instanceof Error) {
-      const cause: string = error.cause ? String(error.cause) : 'N/A'
-      core.setFailed(`Action failed: ${error.message}\nCause: ${cause}`)
+      core.setFailed(error)
     } else {
       core.setFailed(`Action failed with an unknown error: ${String(error)}`)
     }
