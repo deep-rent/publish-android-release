@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-action.json
 name: Publish Android Release
-description: Uploads an Android release artifact to the Google Play Console
+description: Builds, signs, and uploads an Android release artifact to the Google Play Console
 author: deep.rent GmbH
 
 branding:
