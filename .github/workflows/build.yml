@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Compile and Update Badge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Build and Update Coverage
+        run: |
+          npm ci
+          npm run package
+          npm run coverage
+
+      - name: Auto-commit compilation
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'chore: auto-update dist/index.js'
+          file_pattern: 'dist/index.js'
+
+      - name: Auto-commit coverage badge
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'chore: auto-update coverage badge'
+          file_pattern: '.github/assets/coverage.svg'
