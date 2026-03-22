@@ -1,6 +1,7 @@
 # publish-android-release
 
 ![Coverage](.github/assets/coverage.svg)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
 A GitHub Action that automatically builds, signs, and uploads an Android App Bundle (AAB) to the Google Play Console. Originally created for Capacitor apps, this action streamlines your CI/CD pipeline by handling the entire Android release process for any Android project.
 
