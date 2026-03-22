@@ -27,7 +27,9 @@
     "format:check": "npx prettier --check .",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
-    "local-action": "npx @github/local-action . src/main.ts"
+    "local-action": "npx @github/local-action . src/main.ts",
+    "package": "npx rimraf ./dist && npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "package:watch": "npm run package -- --watch"
   },
   "engines": {
     "node": ">=24"
