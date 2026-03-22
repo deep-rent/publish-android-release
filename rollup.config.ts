@@ -17,13 +17,6 @@ const config = {
     json(),
     typescript(),
   ],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onwarn: (warning: any, warn: any) => {
-    if (warning.code === 'THIS_IS_UNDEFINED') {
-      return
-    }
-    warn(warning)
-  },
 }
 
 export default config
