@@ -26,6 +26,7 @@ const config = {
     terser({
       maxWorkers: 4,
       compress: {
+        passes: 2,
         drop_console: false,
       },
     }),
