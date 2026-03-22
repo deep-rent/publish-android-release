@@ -11,7 +11,7 @@ Explore the core capabilities that make this action a powerful tool for your dep
 
 - Builds your Android project using Gradle.
 - Securely signs the generated AAB using your release keystore.
-- Uploads the signed AAB to the Google Play Console via the Google Play Developer API.
+- Uploads the signed AAB to the Google Play Console via the Google Play Developer API (v3).
 - Automatically includes ProGuard/R8 mapping files for crash deobfuscation if found.
 - Supports specifying the deployment track and status.
 
