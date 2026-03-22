@@ -104,3 +104,13 @@ base64 -w 0 my-release-key.jks > encoded.txt
 This project is open-source and available under the **MIT License**.
 
 Feel free to use, modify, and distribute the code however you like! If you're curious about the specifics, you can find all the legal bits in the `LICENSE` file.
+
+---
+
+<p align="center">
+  <a href="https://deep.rent">
+  <img src=".github/assets/logo.svg" width=64 height=64 alt="deep.rent Logo">
+  </a>
+  </br>
+  <strong>deep.rent</strong>
+</p>
