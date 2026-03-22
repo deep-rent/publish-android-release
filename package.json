@@ -24,7 +24,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "format:write": "npx prettier --write .",
-    "format:check": "npx prettier --check ."
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix"
   },
   "engines": {
     "node": ">=24"
