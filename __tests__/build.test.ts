@@ -77,7 +77,7 @@ describe('build', () => {
     mockedExec.exec.mockResolvedValue(1) // Non-zero exit code
 
     await expect(build(mockConfig, '/tmp/keystore.jks')).rejects.toThrow(
-      /Gradle build failed/,
+      /Failed to execute Gradle build/,
     )
   })
 })
