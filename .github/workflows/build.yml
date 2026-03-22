@@ -28,6 +28,7 @@ jobs:
       - name: Build and Update Coverage
         run: |
           npm ci
+          npm run test
           npm run package
           npm run coverage
 
