@@ -26,7 +26,8 @@
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
     "lint": "npx eslint .",
-    "lint:fix": "npx eslint . --fix"
+    "lint:fix": "npx eslint . --fix",
+    "local-action": "npx @github/local-action . src/main.ts"
   },
   "engines": {
     "node": ">=24"
