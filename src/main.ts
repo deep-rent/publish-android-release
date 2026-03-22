@@ -6,6 +6,9 @@ import * as path from 'node:path'
 import * as os from 'node:os'
 import { google } from 'googleapis'
 
+/**
+ * Expected input keys from the GitHub Actions workflow environment.
+ */
 const INPUTS = {
   PROJECT_DIRECTORY: 'project-directory',
   KEYSTORE: 'keystore',
@@ -18,28 +21,50 @@ const INPUTS = {
   STATUS: 'status',
 } as const
 
+/**
+ * Expected output keys from the GitHub Actions workflow environment.
+ */
 const OUTPUTS = {
   VERSION_CODE: 'version-code',
   AAB_PATH: 'aab-path',
 } as const
 
+/** Allowed deployment tracks for the Google Play Console. */
 const VALID_TRACKS = ['internal', 'alpha', 'beta', 'production']
+
+/** Allowed release statuses for the Google Play Console. */
 const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
 
+/**
+ * Strongly typed configuration object containing all validated Action inputs.
+ */
 interface ActionConfig {
+  /** The path to the root of the Android project directory. */
   projectDirectory: string
+  /** The Base64-encoded contents of the signing keystore. */
   keystore: string
+  /** The password for the signing keystore. */
   keystorePassword: string
+  /** The alias of the signing key. */
   keyAlias: string
+  /** The password for the signing key. */
   keyPassword: string
+  /** The JSON string of the Google Cloud service account credentials. */
   serviceAccount: string
+  /** The application ID (package name) of the Android app. */
   packageName: string
+  /** The Play Console track to deploy to (e.g., 'production', 'internal'). */
   track: string
+  /** The status of the release (e.g., 'completed', 'draft'). */
   status: string
 }
 
 /**
  * Reads, parses, and validates all inputs from the GitHub Actions environment.
+ *
+ * @returns The validated configuration object.
+ * @throws {Error} If the project directory is missing, inputs are invalid, or
+ * the service account JSON is malformed.
  */
 function getConfig(): ActionConfig {
   const config: ActionConfig = {
@@ -104,6 +129,10 @@ function getConfig(): ActionConfig {
 /**
  * Decodes the Base64-encoded keystore and writes it to disk.
  * Returns the absolute path to the decoded file.
+ *
+ * @param base64Data - The base64 string representing the keystore file.
+ * @returns A promise resolving to the absolute file path of the saved keystore.
+ * @throws {Error} If writing the file to disk fails or decoding fails.
  */
 async function createKeystore(base64Data: string): Promise<string> {
   core.info('Decoding and saving keystore securely...')
@@ -136,6 +165,12 @@ async function createKeystore(base64Data: string): Promise<string> {
 /**
  * Executes the Gradle build process to build and sign the AAB.
  * Returns the path to the generated AAB file.
+ *
+ * @param config - The validated action configuration.
+ * @param keystorePath - The absolute path to the decoded keystore file.
+ * @returns A promise resolving to the absolute file path of the generated AAB.
+ * @throws {Error} If the gradle wrapper is not found, build fails, or the AAB
+ * is missing.
  */
 async function build(
   config: ActionConfig,
@@ -199,7 +234,12 @@ async function build(
 
 /**
  * Handles the Google Play Developer API transaction for publishing the artifact
- * and mapping file.
+ * and optional mapping file.
+ *
+ * @param config - The validated action configuration.
+ * @param aabPath - The absolute path to the generated AAB file to upload.
+ * @throws {Error} If authentication, bundle upload, mapping upload, or commit
+ * fails for some reason.
  */
 async function publish(config: ActionConfig, aabPath: string): Promise<void> {
   core.info('Authenticating with Google Play...')
@@ -248,9 +288,10 @@ async function publish(config: ActionConfig, aabPath: string): Promise<void> {
     core.info(`Uploaded bundle successfully. Version code: ${versionCode}`)
     core.setOutput(OUTPUTS.VERSION_CODE, versionCode.toString())
 
+    const mappingFile = 'mapping.txt'
     const mappingPath = path.join(
       config.projectDirectory,
-      'app/build/outputs/mapping/release/mapping.txt',
+      `app/build/outputs/mapping/release/${mappingFile}`,
     )
 
     if (existsSync(mappingPath)) {
@@ -267,7 +308,7 @@ async function publish(config: ActionConfig, aabPath: string): Promise<void> {
       })
       core.info('Mapping file uploaded successfully.')
     } else {
-      core.info('No mapping.txt found. Skipping deobfuscation file upload.')
+      core.info(`No ${mappingFile} found. Skipping deobfuscation file upload.`)
     }
 
     core.info(`Assigning release to ${track} track with status '${status}'...`)
@@ -302,7 +343,7 @@ async function publish(config: ActionConfig, aabPath: string): Promise<void> {
       apiError.message?.includes('already been used')
     ) {
       core.error(
-        '\n❌ VERSION CODE CONFLICT: The version code of this build already ' +
+        '\n❌ VERSION CODE CONFLICT - The version code of this build already ' +
           'exists on Google Play. Please increment your version code and try ' +
           'again.\n',
       )
@@ -335,6 +376,8 @@ async function publish(config: ActionConfig, aabPath: string): Promise<void> {
 
 /**
  * Securely deletes sensitive files.
+ *
+ * @param file - The path of the file to delete.
  */
 async function cleanup(file: string): Promise<void> {
   if (file) {
@@ -348,6 +391,11 @@ async function cleanup(file: string): Promise<void> {
   }
 }
 
+/**
+ * Main entry point for the GitHub Action.
+ * This function orchestrates the keystore generation, Gradle build, Google Play
+ * Store upload, and cleanup.
+ */
 export async function run(): Promise<void> {
   let keystorePath: string = ''
 
