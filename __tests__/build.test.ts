@@ -27,6 +27,7 @@ jest.unstable_mockModule('node:os', () => ({
 const core = await import('@actions/core')
 const exec = await import('@actions/exec')
 const { existsSync } = await import('node:fs')
+const fsPromises = await import('node:fs/promises')
 const os = await import('node:os')
 const { build } = await import('../src/build.js')
 
@@ -79,6 +80,34 @@ describe('build', () => {
 
     await expect(build(mockConfig, '/tmp/keystore.jks')).rejects.toThrow(
       /Failed to execute Gradle build/,
+    )
+  })
+
+  it('throws an error if chmod fails on non-Windows', async () => {
+    const mockedChmod = jest.mocked(fsPromises.chmod)
+    mockedChmod.mockRejectedValueOnce(new Error('chmod failed'))
+
+    await expect(build(mockConfig, '/tmp/keystore.jks')).rejects.toThrow(
+      /Failed to make gradlew executable/,
+    )
+  })
+
+  it('skips making gradlew executable on Windows', async () => {
+    ;(os.platform as jest.Mock).mockReturnValue('win32')
+    const mockedChmod = jest.mocked(fsPromises.chmod)
+
+    await build(mockConfig, '/tmp/keystore.jks')
+
+    expect(mockedChmod).not.toHaveBeenCalled()
+  })
+
+  it('throws an error if the expected AAB file is not found after build', async () => {
+    mockedExistsSync.mockImplementation((targetPath) =>
+      String(targetPath).includes('gradlew'),
+    )
+
+    await expect(build(mockConfig, '/tmp/keystore.jks')).rejects.toThrow(
+      /AAB file not found at expected path/,
     )
   })
 })
