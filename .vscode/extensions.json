@@ -4,6 +4,6 @@
     "esbenp.prettier-vscode",
     "github.vscode-github-actions",
     "github.vscode-pull-request-github",
-    "redhat.vscode-yaml",
+    "redhat.vscode-yaml"
   ]
 }
