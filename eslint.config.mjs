@@ -40,7 +40,6 @@ export default tseslint.config(
             'eslint.config.mjs',
             'jest.config.ts',
             'prettier.config.mjs',
-            'rollup.config.ts',
           ],
         },
         tsconfigRootDir: import.meta.dirname,
