@@ -9,40 +9,40 @@ branding:
 
 inputs:
   project-directory:
-    description: 'Path to the Android folder containing gradlew'
+    description: 'Path to the root Android project directory containing the gradlew executable.'
     required: true
     default: '.'
   keystore:
-    description: 'Base64 encoded keystore file'
+    description: 'Base64-encoded string representation of your Android release keystore (e.g., .jks or .keystore) file.'
     required: true
   keystore-password:
-    description: 'Keystore password'
+    description: 'The password required to unlock the Android keystore.'
     required: true
   key-alias:
-    description: 'Key alias'
+    description: 'The alias of the signing key stored within the keystore.'
     required: true
   key-password:
-    description: 'Key password'
+    description: 'The password for the specific signing key alias.'
     required: true
   service-account:
-    description: 'The plain text of the service account JSON'
+    description: 'The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API.'
     required: true
   package-name:
-    description: 'The package name of the app'
+    description: 'The application ID (package name) of the Android app (e.g., com.example.app).'
     required: true
   track:
-    description: 'The track to promote to'
+    description: 'The Google Play track to publish the release to. Valid options are: internal, alpha, beta, production.'
     required: true
     default: 'internal'
   status:
-    description: 'Release status (e.g., completed, draft, halted, inProgress)'
+    description: 'The status of the release. Valid options are: completed, draft, halted, inProgress.'
     required: true
     default: 'completed'
 outputs:
   version-code:
-    description: 'The version code of the uploaded release'
+    description: 'The assigned version code of the successfully uploaded Android App Bundle (AAB).'
   aab-path:
-    description: 'The local path to the generated AAB file'
+    description: 'The absolute local path to the generated and signed Android App Bundle (AAB) file.'
 
 runs:
   using: node24
