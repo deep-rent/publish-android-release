@@ -19,21 +19,21 @@ const config: RollupOptions = {
     propertyReadSideEffects: false,
   },
   plugins: [
-    // @ts-expect-error - Plugin types are not callable in NodeNext.
-    nodeResolve({ preferBuiltins: true }),
-    // @ts-expect-error - Plugin types are not callable in NodeNext.
-    commonjs(),
-    // @ts-expect-error - Plugin types are not callable in NodeNext.
-    json(),
-    // @ts-expect-error - Plugin types are not callable in NodeNext.
-    typescript({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (nodeResolve as any)({ preferBuiltins: true }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (commonjs as any)(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (json as any)(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (typescript as any)({
       compilerOptions: {
         moduleResolution: 'bundler',
         module: 'ESNext',
       },
     }),
-    // @ts-expect-error - Plugin types are not callable in NodeNext.
-    terser({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (terser as any)({
       maxWorkers: 4,
       compress: {
         passes: 2,
