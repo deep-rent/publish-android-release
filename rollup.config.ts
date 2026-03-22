@@ -12,7 +12,7 @@ const config: RollupOptions = {
     file: 'dist/index.js',
     format: 'es',
     inlineDynamicImports: true,
-    sourcemap: true,
+    sourcemap: false,
   },
   treeshake: {
     moduleSideEffects: 'no-external',
