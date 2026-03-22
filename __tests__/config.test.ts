@@ -34,6 +34,10 @@ describe('config', () => {
       switch (name) {
         case INPUTS.PROJECT_DIRECTORY:
           return './android'
+        case INPUTS.RELEASE_FILE:
+          return 'app/build/outputs/bundle/release/app-release.aab'
+        case INPUTS.MAPPING_FILE:
+          return 'app/build/outputs/mapping/release/mapping.txt'
         case INPUTS.TRACK:
           return 'production'
         case INPUTS.STATUS:
@@ -49,6 +53,12 @@ describe('config', () => {
   it('returns a valid configuration object', () => {
     const config = getConfig()
     expect(config.projectDirectory).toBe('./android')
+    expect(config.releaseFile).toBe(
+      'app/build/outputs/bundle/release/app-release.aab',
+    )
+    expect(config.mappingFile).toBe(
+      'app/build/outputs/mapping/release/mapping.txt',
+    )
     expect(config.track).toBe('production')
     expect(config.status).toBe('completed')
   })

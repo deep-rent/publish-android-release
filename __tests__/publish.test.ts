@@ -35,6 +35,8 @@ describe('publish', () => {
   const mockConfig = {
     projectDirectory: './android',
     packageName: 'com.example.app',
+    releaseFile: 'app/build/outputs/bundle/release/app-release.aab',
+    mappingFile: 'app/build/outputs/mapping/release/mapping.txt',
     track: 'production',
     status: 'completed',
     serviceAccount: '{"client_email": "test@test.com"}',

@@ -36,6 +36,7 @@ describe('build', () => {
     keystorePassword: 'keystore-pass',
     keyAlias: 'my-alias',
     keyPassword: 'key-pass',
+    releaseFile: 'app/build/outputs/bundle/release/app-release.aab',
   } as ActionConfig
 
   const mockedExec = jest.mocked(exec)

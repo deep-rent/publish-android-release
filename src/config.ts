@@ -17,6 +17,8 @@ export const INPUTS = {
   KEY_PASSWORD: 'key-password',
   SERVICE_ACCOUNT: 'service-account',
   PACKAGE_NAME: 'package-name',
+  RELEASE_FILE: 'release-file',
+  MAPPING_FILE: 'mapping-file',
   TRACK: 'track',
   STATUS: 'status',
 } as const
@@ -53,6 +55,10 @@ export interface ActionConfig {
   serviceAccount: string
   /** The application ID (package name) of the Android app. */
   packageName: string
+  /** The relative path to the generated AAB file to upload. */
+  releaseFile: string
+  /** The relative path to the generated ProGuard/R8 mapping file. */
+  mappingFile: string
   /** The Play Console track to deploy to (e.g., 'production', 'internal'). */
   track: string
   /** The status of the release (e.g., 'completed', 'draft'). */
@@ -87,6 +93,12 @@ export function getConfig(): ActionConfig {
       required: true,
     }),
     packageName: core.getInput(INPUTS.PACKAGE_NAME, {
+      required: true,
+    }),
+    releaseFile: core.getInput(INPUTS.RELEASE_FILE, {
+      required: true,
+    }),
+    mappingFile: core.getInput(INPUTS.MAPPING_FILE, {
       required: true,
     }),
     track: core.getInput(INPUTS.TRACK, {

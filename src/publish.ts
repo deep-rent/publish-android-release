@@ -68,11 +68,7 @@ export async function publish(
     core.info(`Uploaded bundle successfully. Version code: ${versionCode}`)
     core.setOutput(OUTPUTS.VERSION_CODE, versionCode.toString())
 
-    const mappingFile = 'mapping.txt'
-    const mappingPath = path.join(
-      config.projectDirectory,
-      `app/build/outputs/mapping/release/${mappingFile}`,
-    )
+    const mappingPath = path.join(config.projectDirectory, config.mappingFile)
 
     if (existsSync(mappingPath)) {
       core.info('Found a mapping file! Uploading for crash deobfuscation...')
@@ -88,7 +84,9 @@ export async function publish(
       })
       core.info('Mapping file uploaded successfully.')
     } else {
-      core.info(`No ${mappingFile} found. Skipping deobfuscation file upload.`)
+      core.info(
+        `No mapping file found at ${config.mappingFile}. Skipping deobfuscation file upload.`,
+      )
     }
 
     core.info(`Assigning release to ${track} track with status '${status}'...`)

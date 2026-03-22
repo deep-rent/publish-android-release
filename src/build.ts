@@ -65,10 +65,7 @@ export async function build(
     throw new Error(`Failed to execute Gradle build`, { cause: error })
   }
 
-  const aabPath = path.join(
-    config.projectDirectory,
-    'app/build/outputs/bundle/release/app-release.aab',
-  )
+  const aabPath = path.join(config.projectDirectory, config.releaseFile)
 
   if (!existsSync(aabPath)) {
     throw new Error(

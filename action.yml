@@ -30,6 +30,14 @@ inputs:
   package-name:
     description: 'The application ID (package name) of the Android app (e.g., com.example.app).'
     required: true
+  release-file:
+    description: 'The relative path to the generated Android App Bundle (AAB) file.'
+    required: true
+    default: 'app/build/outputs/bundle/release/app-release.aab'
+  mapping-file:
+    description: 'The relative path to the generated ProGuard/R8 mapping.txt file.'
+    required: true
+    default: 'app/build/outputs/mapping/release/mapping.txt'
   track:
     description: 'The Google Play track to publish the release to. Valid options are: internal, alpha, beta, production.'
     required: true
