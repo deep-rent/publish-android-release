@@ -14,3 +14,13 @@ updates:
         dependency-type: production
         update-types:
           - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions-minor:
+        update-types:
+          - minor
+          - patch
