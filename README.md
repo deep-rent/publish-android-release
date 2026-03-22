@@ -6,6 +6,8 @@ A GitHub Action that automatically builds, signs, and uploads an Android App Bun
 
 ## Features
 
+Explore the core capabilities that make this action a powerful tool for your deployment workflow:
+
 - Builds your Android project using Gradle.
 - Securely signs the generated AAB using a Base64-encoded keystore.
 - Uploads the signed AAB to the Google Play Console via the Google Play Developer API.
@@ -13,6 +15,8 @@ A GitHub Action that automatically builds, signs, and uploads an Android App Bun
 - Supports specifying the deployment track (`internal`, `alpha`, `beta`, `production`) and status.
 
 ## Usage
+
+Follow this example to integrate the action into your GitHub Actions workflow file:
 
 ```yaml
 name: Deploy Android Release
@@ -50,6 +54,8 @@ jobs:
 
 ## Inputs
 
+Configure these parameters to customize how the action builds and signs your application:
+
 | Name | Required | Default | Description |
 |------|:--------:|---------|-------------|
 | `project-directory` | No | `.` | Path to the root Android project directory containing the `gradlew` executable. |
@@ -66,12 +72,16 @@ jobs:
 
 ## Outputs
 
+Access these values in subsequent steps of your workflow to track build artifacts:
+
 | Name | Description |
 |------|-------------|
 | `version-code` | The assigned version code of the successfully uploaded Android App Bundle (AAB). |
 | `aab-path` | The absolute local path to the generated and signed Android App Bundle (AAB) file. |
 
 ## Prerequisites
+
+Before running the action, ensure you have these external assets and permissions ready.
 
 ### 1. Google Play Service Account
 
