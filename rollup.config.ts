@@ -35,6 +35,9 @@ const config: RollupOptions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (terser as any)({
       maxWorkers: 4,
+      format: {
+        comments: false,
+      },
       compress: {
         passes: 2,
         drop_console: false,
