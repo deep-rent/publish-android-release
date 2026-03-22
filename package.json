@@ -24,6 +24,7 @@
   "scripts": {
     "all": "npm run format:write && npm run lint && npm run test && npm run package",
     "bundle": "npm run format:write && npm run package",
+    "coverage": "npx make-coverage-badge --output-path .github/assets/coverage.svg",
     "format:check": "npx prettier --check .",
     "format:write": "npx prettier --write .",
     "lint:fix": "npx eslint . --fix",
