@@ -4,14 +4,14 @@
 ![Coverage](.github/assets/coverage.svg)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
-A GitHub Action that automatically builds, signs, and uploads an Android App Bundle (AAB) to the Google Play Console. Originally created for Capacitor apps, this action streamlines your CI/CD pipeline by handling the entire Android release process for any Android project.
+A GitHub Action that automatically builds, signs, and uploads an **Android App Bundle** (AAB) to the **Google Play Console**. Originally created for Capacitor apps, this action streamlines your CI/CD pipeline by handling the entire Android release process for any Android project.
 
 ## Features
 
 Explore the core capabilities that make this action a powerful tool for your deployment workflow:
 
 - Builds your Android project using Gradle.
-- Securely signs the generated AAB using your release keystore.
+- Securely signs the generated AAB using a Java keystore.
 - Uploads the signed AAB to the Google Play Console via the Google Play Developer API (v3).
 - Automatically includes ProGuard/R8 mapping files for crash deobfuscation if found.
 - Supports specifying the deployment track and status.
