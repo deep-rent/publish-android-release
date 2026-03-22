@@ -45,31 +45,8 @@ jobs:
         run: |
           npm run coverage
 
-      - name: Auto-commit Package
+      - name: Auto-commit Package and Coverage
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'chore: update transpiled output'
-          file_pattern: 'dist/index.js'
-
-      - name: Auto-commit Coverage Badge
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: 'chore: update coverage badge'
-          file_pattern: '.github/assets/coverage.svg'
-
-  test-action:
-    name: GitHub Actions Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Test Local Action
-        id: test-action
-        uses: ./
-        with:
-          milliseconds: 2000
-
-      - name: Print Output
-        run: echo "${{ steps.test-action.outputs.time }}"
+          commit_message: 'chore: update transpiled output and coverage badge'
+          file_pattern: 'dist/index.js .github/assets/coverage.svg'
