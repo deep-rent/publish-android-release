@@ -34,11 +34,11 @@ jobs:
       - name: Auto-commit compilation
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'chore: auto-update dist/index.js'
+          commit_message: 'chore: update transpiled output'
           file_pattern: 'dist/index.js'
 
       - name: Auto-commit coverage badge
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'chore: auto-update coverage badge'
+          commit_message: 'chore: update coverage badge'
           file_pattern: '.github/assets/coverage.svg'
