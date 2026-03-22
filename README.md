@@ -88,16 +88,19 @@ Before running the action, ensure you have these external assets and permissions
 
 You must create a Service Account in the Google Cloud Console, grant it the necessary permissions in the Google Play Console, and generate a JSON key. Store the raw JSON content as a GitHub Secret.
 
-### 2. Base64 Keystore
+### 2. Release Keystore
 
-Encode your release `.jks` or `.keystore` file to Base64 and store it as a GitHub Secret.
+Encode your release `.jks` or `.keystore` file to Base64 and save it as a GitHub Secret.
 
 ```bash
 # macOS
-base64 -i my-release-key.jks | pbcopy
+base64 -i release.jks | pbcopy
 
 # Linux
-base64 -w 0 my-release-key.jks > encoded.txt
+base64 -w 0 release.jks > encoded.txt
+
+# Windows (PowerShell)
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks")) | Set-Clipboard
 ```
 
 ## License
