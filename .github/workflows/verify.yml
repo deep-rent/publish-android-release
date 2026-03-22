@@ -44,6 +44,22 @@ jobs:
         id: npm-test
         run: npm run test
 
+      - name: Build and Update Coverage Badge
+        id: npm-build-coverage
+        run: |
+          npm run package
+          npm run coverage
+
+      - name: Verify No Uncommitted Changes
+        id: verify-changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "❌ Outdated 'dist/index.js' or '.github/assets/coverage.svg' detected!"
+            echo "Please run 'npm run package' and 'npm run coverage' locally, commit the changes, and push again."
+            git status --porcelain
+            exit 1
+          fi
+
   test-action:
     name: GitHub Actions Test
     runs-on: ubuntu-latest
