@@ -17,38 +17,42 @@ jest.mock('../src/keystore.js')
 jest.mock('../src/build.js')
 jest.mock('../src/publish.js')
 
+const mockedGetConfig = jest.mocked(configModule.getConfig)
+const mockedCreateKeystore = jest.mocked(keystoreModule.createKeystore)
+const mockedCleanup = jest.mocked(keystoreModule.cleanup)
+const mockedBuild = jest.mocked(buildModule.build)
+const mockedPublish = jest.mocked(publishModule.publish)
+
 describe('main', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(configModule.getConfig as jest.Mock).mockReturnValue({
+    mockedGetConfig.mockReturnValue({
       keystore: 'base64',
-    })
-    ;(keystoreModule.createKeystore as jest.Mock).mockResolvedValue(
-      '/tmp/keystore.jks',
-    )
-    ;(buildModule.build as jest.Mock).mockResolvedValue('/tmp/app-release.aab')
-    ;(publishModule.publish as jest.Mock).mockResolvedValue(undefined)
+    } as configModule.ActionConfig)
+    mockedCreateKeystore.mockResolvedValue('/tmp/keystore.jks')
+    mockedBuild.mockResolvedValue('/tmp/app-release.aab')
+    mockedPublish.mockResolvedValue(undefined)
   })
 
   it('orchestrates the successful run of all modules', async () => {
     await run()
 
-    expect(configModule.getConfig).toHaveBeenCalled()
-    expect(keystoreModule.createKeystore).toHaveBeenCalledWith('base64')
-    expect(buildModule.build).toHaveBeenCalledWith(
+    expect(mockedGetConfig).toHaveBeenCalled()
+    expect(mockedCreateKeystore).toHaveBeenCalledWith('base64')
+    expect(mockedBuild).toHaveBeenCalledWith(
       expect.any(Object),
       '/tmp/keystore.jks',
     )
-    expect(publishModule.publish).toHaveBeenCalledWith(
+    expect(mockedPublish).toHaveBeenCalledWith(
       expect.any(Object),
       '/tmp/app-release.aab',
     )
-    expect(keystoreModule.cleanup).toHaveBeenCalledWith('/tmp/keystore.jks')
+    expect(mockedCleanup).toHaveBeenCalledWith('/tmp/keystore.jks')
   })
 
   it('sets the action to failed if any step throws a standard Error', async () => {
     const error = new Error('Build failed critically')
-    ;(buildModule.build as jest.Mock).mockRejectedValue(error)
+    mockedBuild.mockRejectedValue(error)
 
     await run()
 
@@ -58,13 +62,13 @@ describe('main', () => {
 
   it('sets the action to failed if any step throws an unknown non-Error object', async () => {
     const unknownError = 'Some bizarre string exception'
-    ;(buildModule.build as jest.Mock).mockRejectedValue(unknownError)
+    mockedBuild.mockRejectedValue(unknownError)
 
     await run()
 
     expect(core.setFailed).toHaveBeenCalledWith(
       expect.stringContaining('Some bizarre string exception'),
     )
-    expect(keystoreModule.cleanup).toHaveBeenCalledWith('/tmp/keystore.jks')
+    expect(mockedCleanup).toHaveBeenCalledWith('/tmp/keystore.jks')
   })
 })

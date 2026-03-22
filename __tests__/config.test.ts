@@ -5,22 +5,27 @@
 
 import { jest } from '@jest/globals'
 import * as core from '@actions/core'
-import * as fs from 'node:fs'
+import { existsSync } from 'node:fs'
 import * as path from 'node:path'
 import { getConfig, INPUTS } from '../src/config.js'
 
 jest.mock('@actions/core')
-jest.mock('node:fs')
+jest.mock('node:fs', () => ({
+  ...(jest.requireActual('node:fs') as typeof import('node:fs')),
+  existsSync: jest.fn(),
+}))
 
 describe('config', () => {
-  const serviceAccountFixture = fs.readFileSync(
+  const fsActual = jest.requireActual('node:fs') as typeof import('node:fs')
+  const serviceAccountFixture = fsActual.readFileSync(
     path.resolve(__dirname, '../__fixtures__/service-account.json'),
     'utf8',
   )
 
+  const mockedExistsSync = jest.mocked(existsSync)
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(fs.existsSync as jest.Mock).mockReturnValue(true)
+    mockedExistsSync.mockReturnValue(true)
     ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
       switch (name) {
         case INPUTS.PROJECT_DIRECTORY:
@@ -45,7 +50,7 @@ describe('config', () => {
   })
 
   it('throws an error if the project directory does not exist', () => {
-    ;(fs.existsSync as jest.Mock).mockReturnValue(false)
+    mockedExistsSync.mockReturnValue(false)
     expect(() => getConfig()).toThrow(/Android directory not found/)
   })
 
