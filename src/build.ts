@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 deep.rent GmbH (https://deep.rent)
+ * Licensed under the MIT License.
+ */
+
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as fs from 'node:fs/promises'

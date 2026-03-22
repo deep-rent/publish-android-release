@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 deep.rent GmbH (https://deep.rent)
+ * Licensed under the MIT License.
+ */
+
 import * as core from '@actions/core'
 import { getConfig, ActionConfig } from './config.js'
 import { createKeystore, cleanup } from './keystore.js'
