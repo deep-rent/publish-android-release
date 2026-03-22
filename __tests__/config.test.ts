@@ -4,21 +4,25 @@
  */
 
 import { jest } from '@jest/globals'
-import * as core from '@actions/core'
-import { existsSync } from 'node:fs'
 import * as path from 'node:path'
-import { getConfig, INPUTS } from '../src/config.js'
 
-jest.mock('@actions/core')
-jest.mock('node:fs', () => ({
-  ...(jest.requireActual('node:fs') as typeof import('node:fs')),
+const fsActual = await import('node:fs')
+
+jest.unstable_mockModule('@actions/core', () => ({
+  getInput: jest.fn(),
+}))
+jest.unstable_mockModule('node:fs', () => ({
+  ...fsActual,
   existsSync: jest.fn(),
 }))
 
+const core = await import('@actions/core')
+const { existsSync } = await import('node:fs')
+const { getConfig, INPUTS } = await import('../src/config.js')
+
 describe('config', () => {
-  const fsActual = jest.requireActual('node:fs') as typeof import('node:fs')
   const serviceAccountFixture = fsActual.readFileSync(
-    path.resolve(__dirname, '../__fixtures__/service-account.json'),
+    path.resolve(import.meta.dirname, '../__fixtures__/service-account.json'),
     'utf8',
   )
 

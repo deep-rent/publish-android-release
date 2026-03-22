@@ -4,12 +4,19 @@
  */
 
 import { jest } from '@jest/globals'
-import * as core from '@actions/core'
-import * as fs from 'node:fs/promises'
-import { createKeystore, cleanup } from '../src/keystore.js'
 
-jest.mock('@actions/core')
-jest.mock('node:fs/promises')
+jest.unstable_mockModule('@actions/core', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+}))
+jest.unstable_mockModule('node:fs/promises', () => ({
+  writeFile: jest.fn(),
+  rm: jest.fn(),
+}))
+
+const core = await import('@actions/core')
+const fs = await import('node:fs/promises')
+const { createKeystore, cleanup } = await import('../src/keystore.js')
 
 const mockedFs = jest.mocked(fs)
 

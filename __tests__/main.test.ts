@@ -4,18 +4,31 @@
  */
 
 import { jest } from '@jest/globals'
-import * as core from '@actions/core'
-import { run } from '../src/main.js'
-import * as configModule from '../src/config.js'
-import * as keystoreModule from '../src/keystore.js'
-import * as buildModule from '../src/build.js'
-import * as publishModule from '../src/publish.js'
+import type { ActionConfig } from '../src/config.js'
 
-jest.mock('@actions/core')
-jest.mock('../src/config.js')
-jest.mock('../src/keystore.js')
-jest.mock('../src/build.js')
-jest.mock('../src/publish.js')
+jest.unstable_mockModule('@actions/core', () => ({
+  setFailed: jest.fn(),
+}))
+jest.unstable_mockModule('../src/config.js', () => ({
+  getConfig: jest.fn(),
+}))
+jest.unstable_mockModule('../src/keystore.js', () => ({
+  createKeystore: jest.fn(),
+  cleanup: jest.fn(),
+}))
+jest.unstable_mockModule('../src/build.js', () => ({
+  build: jest.fn(),
+}))
+jest.unstable_mockModule('../src/publish.js', () => ({
+  publish: jest.fn(),
+}))
+
+const core = await import('@actions/core')
+const configModule = await import('../src/config.js')
+const keystoreModule = await import('../src/keystore.js')
+const buildModule = await import('../src/build.js')
+const publishModule = await import('../src/publish.js')
+const { run } = await import('../src/main.js')
 
 const mockedGetConfig = jest.mocked(configModule.getConfig)
 const mockedCreateKeystore = jest.mocked(keystoreModule.createKeystore)
@@ -28,7 +41,7 @@ describe('main', () => {
     jest.clearAllMocks()
     mockedGetConfig.mockReturnValue({
       keystore: 'base64',
-    } as configModule.ActionConfig)
+    } as ActionConfig)
     mockedCreateKeystore.mockResolvedValue('/tmp/keystore.jks')
     mockedBuild.mockResolvedValue('/tmp/app-release.aab')
     mockedPublish.mockResolvedValue(undefined)

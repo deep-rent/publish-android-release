@@ -4,18 +4,32 @@
  */
 
 import { jest } from '@jest/globals'
-import * as core from '@actions/core'
-import { existsSync, createReadStream } from 'node:fs'
-import { google } from 'googleapis'
-import { publish } from '../src/publish.js'
-import { ActionConfig, OUTPUTS } from '../src/config.js'
+import type { ActionConfig } from '../src/config.js'
 
-jest.mock('@actions/core')
-jest.mock('node:fs', () => ({
+jest.unstable_mockModule('@actions/core', () => ({
+  info: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
+  setOutput: jest.fn(),
+}))
+jest.unstable_mockModule('node:fs', () => ({
   existsSync: jest.fn(),
   createReadStream: jest.fn(),
 }))
-jest.mock('googleapis')
+jest.unstable_mockModule('googleapis', () => ({
+  google: {
+    auth: {
+      GoogleAuth: jest.fn(),
+    },
+    androidpublisher: jest.fn(),
+  },
+}))
+
+const core = await import('@actions/core')
+const { existsSync, createReadStream } = await import('node:fs')
+const { google } = await import('googleapis')
+const { publish } = await import('../src/publish.js')
+const { OUTPUTS } = await import('../src/config.js')
 
 describe('publish', () => {
   const mockConfig = {

@@ -4,19 +4,28 @@
  */
 
 import { jest } from '@jest/globals'
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import { existsSync } from 'node:fs'
-import * as os from 'node:os'
-import { build } from '../src/build.js'
-import { ActionConfig } from '../src/config.js'
+import type { ActionConfig } from '../src/config.js'
 
-jest.mock('@actions/core')
-jest.mock('@actions/exec')
-jest.mock('node:fs', () => ({
+jest.unstable_mockModule('@actions/core', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  setOutput: jest.fn(),
+}))
+jest.unstable_mockModule('@actions/exec', () => ({
+  exec: jest.fn(),
+}))
+jest.unstable_mockModule('node:fs', () => ({
   existsSync: jest.fn(),
 }))
-jest.mock('node:os')
+jest.unstable_mockModule('node:os', () => ({
+  platform: jest.fn(),
+}))
+
+const core = await import('@actions/core')
+const exec = await import('@actions/exec')
+const { existsSync } = await import('node:fs')
+const os = await import('node:os')
+const { build } = await import('../src/build.js')
 
 describe('build', () => {
   const mockConfig = {
