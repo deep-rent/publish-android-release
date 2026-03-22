@@ -109,8 +109,23 @@ async function createKeystore(base64Data: string): Promise<string> {
   core.info('Decoding and saving keystore securely...')
   const keystorePath = path.join(os.tmpdir(), `release_${Date.now()}.keystore`)
 
+  // Remove any whitespace or newlines that might have been accidentally
+  // included.
+  const sanitized = base64Data.replace(/[\s\r\n]+/g, '')
+
+  // if (
+  //   !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
+  //     sanitized,
+  //   )
+  // ) {
+  //   throw new Error(
+  //     'The provided keystore is not a valid Base64 string. Please verify ' +
+  //       'the corresponding GitHub Action secret.',
+  //   )
+  // }
+
   try {
-    const keystoreBuffer = Buffer.from(base64Data, 'base64')
+    const keystoreBuffer = Buffer.from(sanitized, 'base64')
     await fs.writeFile(keystorePath, keystoreBuffer)
     return keystorePath
   } catch (error: unknown) {
