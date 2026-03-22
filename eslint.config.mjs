@@ -6,19 +6,16 @@ import prettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 
 export default tseslint.config(
-  // 1. Global Ignores
   {
     ignores: ['coverage/**', 'dist/**', 'node_modules/**'],
   },
-
-  // 2. Base Configurations
   js.configs.recommended,
   ...tseslint.configs.recommended,
   jest.configs['flat/recommended'],
   prettierRecommended,
 
   {
-    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.mjs'],
+    files: ['**/*.ts', '**/*.js', '**/*.mjs'],
     languageOptions: {
       globals: {
         ...globals.node,
