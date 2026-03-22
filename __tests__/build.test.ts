@@ -17,6 +17,9 @@ jest.unstable_mockModule('@actions/exec', () => ({
 jest.unstable_mockModule('node:fs', () => ({
   existsSync: jest.fn(),
 }))
+jest.unstable_mockModule('node:fs/promises', () => ({
+  chmod: jest.fn(),
+}))
 jest.unstable_mockModule('node:os', () => ({
   platform: jest.fn(),
 }))
