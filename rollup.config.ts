@@ -9,14 +9,19 @@ const config = {
     esModule: true,
     file: 'dist/index.js',
     format: 'es',
-    sourcemap: true,
     inlineDynamicImports: true,
+    sourcemap: true,
   },
   plugins: [
     nodeResolve({ preferBuiltins: true }),
     commonjs(),
     json(),
-    typescript(),
+    typescript({
+      compilerOptions: {
+        moduleResolution: 'bundler',
+        module: 'ESNext',
+      },
+    }),
   ],
 }
 
