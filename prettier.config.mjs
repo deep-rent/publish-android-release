@@ -14,6 +14,14 @@ const config = {
   tabWidth: 2,
   trailingComma: 'all',
   useTabs: false,
+  overrides: [
+    {
+      files: ['*.yaml', '*.yml'],
+      options: {
+        printWidth: 999,
+      },
+    },
+  ],
 }
 
 export default config
