@@ -10,6 +10,7 @@ const config = {
     file: 'dist/index.js',
     format: 'es',
     sourcemap: true,
+    inlineDynamicImports: true,
   },
   plugins: [
     nodeResolve({ preferBuiltins: true }),
