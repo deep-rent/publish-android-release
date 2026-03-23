@@ -5,6 +5,11 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+      - 'README.md'
+      - 'LICENSE'
   # push:
   #   branches:
   #     - main
