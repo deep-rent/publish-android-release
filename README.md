@@ -120,7 +120,7 @@ base64 -i android.jks | pbcopy
 base64 -w 0 android.jks > android.txt
 
 # Windows (PowerShell)
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("keystore.jks")) | Set-Clipboard
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("android.jks")) | Set-Clipboard
 ```
 
 ## License
