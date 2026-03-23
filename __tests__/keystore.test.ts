@@ -28,7 +28,7 @@ describe('keystore', () => {
   describe('createKeystore', () => {
     it('decodes base64 data and writes it to a temporary file', async () => {
       // "test" in base64 is "dGVzdA=="
-      const result = await createKeystore('dGVzdA==')
+      const result = await createKeystore(Buffer.from('dGVzdA==', 'base64'))
       expect(mockedFs.writeFile).toHaveBeenCalled()
       expect(result).toMatch(/\.keystore$/)
     })
