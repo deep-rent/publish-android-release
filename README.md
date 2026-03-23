@@ -50,7 +50,7 @@ jobs:
           keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
           key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          service-account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          service-account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
           track: 'production'
           status: 'completed'
 ```
