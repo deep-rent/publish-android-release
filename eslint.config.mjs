@@ -42,6 +42,7 @@ export default defineConfig(
             'jest.config.ts',
             'prettier.config.mjs',
           ],
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 100,
         },
         tsconfigRootDir: import.meta.dirname,
       },
