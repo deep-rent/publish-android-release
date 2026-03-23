@@ -46,6 +46,9 @@ inputs:
     description: 'The status of the release. Valid options are: completed, draft, halted, inProgress.'
     required: true
     default: 'completed'
+  user-fraction:
+    description: 'The fraction of users who will receive the release (between 0.0 and 1.0). Only applicable when status is inProgress or halted.'
+    required: false
 outputs:
   version-code:
     description: 'The assigned version code of the successfully uploaded Android App Bundle (AAB).'
