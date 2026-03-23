@@ -37,22 +37,28 @@ jobs:
       - name: Check Format
         run: npm run format:check
 
-      - name: Lint
+      - name: Lint Code
         run: npm run lint
 
-      - name: Test
+      - name: Execute Tests
         run: npm run test
 
-      - name: Transpile
+      - name: Transpile Code
         run: |
           npm run build
 
-      - name: Coverage
+      - name: Report Coverage
         run: |
           npm run coverage
 
-      - name: Auto-commit Package and Coverage
+      - name: Commit Transpiled Output
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: 'chore: update transpiled output and coverage badge'
-          file_pattern: 'dist/index.js .github/assets/coverage.svg'
+          commit_message: 'chore: update transpiled output'
+          file_pattern: 'dist/index.js'
+
+      - name: Commit Coverage Badge
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'chore: update coverage badge'
+          file_pattern: '.github/assets/coverage.svg'
