@@ -4,9 +4,7 @@
 ![Coverage](.github/assets/coverage.svg)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
-A GitHub Action that automatically builds, signs, and uploads an **Android App Bundle** (AAB) to the **Google Play Console**.
-
-While originally designed for **Capacitor** apps, this action is fully compatible with **Flutter**, **React Native**, and **Native Android** projects. It streamlines your CI/CD pipeline by handling the entire Android release process for any Gradle-based project.
+This GitHub Action automatically builds, signs, and uploads an **Android App Bundle** (AAB) to the **Google Play Console**.
 
 ## Features
 
@@ -124,6 +122,10 @@ base64 -w 0 android.jks > android.txt
 # Windows (PowerShell)
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("android.jks")) | Set-Clipboard
 ```
+
+## Compatibility
+
+While originally designed for **Capacitor** apps, this action is fully compatible with **Flutter**, **React Native**, and **Native Android** projects. It streamlines your CI/CD pipeline by handling the entire Android release process for any Gradle-based project.
 
 ## License
 
