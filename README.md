@@ -64,7 +64,7 @@ Configure these parameters to customize how the action builds and signs your app
 | `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks` or `.keystore`) file. |
 | `keystore-password` | Yes | The password required to unlock the Android keystore. |
 | `key-alias` | Yes | The alias of the signing key stored within the keystore. |
-| `key-password` | Yes | The password for the specific signing key alias. |
+| `key-password` | No | The password for the specific signing key alias.<br><br>**Default:** If omitted, the `keystore-password` value is used |
 | `service-account` | Yes | The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API. |
 | `package-name` | Yes | The application ID (package name) of the Android app (e.g., `com.example.app`). |
 | `release-file` | No | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
