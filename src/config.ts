@@ -74,24 +74,24 @@ export interface ActionConfig {
  * the service account JSON is malformed.
  */
 export function getConfig(): ActionConfig {
-  function getRequiredInput(name: string): string {
+  function requiredInput(name: string): string {
     return core.getInput(name, { required: true })
   }
-  function getOptionalInput(name: string): string {
+  function optionalInput(name: string): string {
     return core.getInput(name, { required: false })
   }
 
-  const projectDirectory = getRequiredInput(INPUTS.PROJECT_DIRECTORY)
-  const rawKeystore = getRequiredInput(INPUTS.KEYSTORE)
-  const keystorePassword = getRequiredInput(INPUTS.KEYSTORE_PASSWORD)
-  const keyAlias = getRequiredInput(INPUTS.KEY_ALIAS)
-  const keyPassword = getOptionalInput(INPUTS.KEY_PASSWORD) || keystorePassword
-  const rawServiceAccount = getRequiredInput(INPUTS.SERVICE_ACCOUNT)
-  const packageName = getRequiredInput(INPUTS.PACKAGE_NAME)
-  const releaseFile = getRequiredInput(INPUTS.RELEASE_FILE)
-  const mappingFile = getRequiredInput(INPUTS.MAPPING_FILE)
-  const track = getRequiredInput(INPUTS.TRACK)
-  const status = getRequiredInput(INPUTS.STATUS)
+  const projectDirectory = requiredInput(INPUTS.PROJECT_DIRECTORY)
+  const rawKeystore = requiredInput(INPUTS.KEYSTORE)
+  const keystorePassword = requiredInput(INPUTS.KEYSTORE_PASSWORD)
+  const keyAlias = requiredInput(INPUTS.KEY_ALIAS)
+  const keyPassword = optionalInput(INPUTS.KEY_PASSWORD) || keystorePassword
+  const rawServiceAccount = requiredInput(INPUTS.SERVICE_ACCOUNT)
+  const packageName = requiredInput(INPUTS.PACKAGE_NAME)
+  const releaseFile = requiredInput(INPUTS.RELEASE_FILE)
+  const mappingFile = requiredInput(INPUTS.MAPPING_FILE)
+  const track = requiredInput(INPUTS.TRACK)
+  const status = requiredInput(INPUTS.STATUS)
 
   if (!existsSync(projectDirectory)) {
     throw new Error(
