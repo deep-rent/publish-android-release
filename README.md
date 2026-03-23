@@ -66,7 +66,7 @@ Configure these parameters to customize how the action builds and signs your app
 | `keystore-password` | Yes | The password required to unlock the Android keystore. |
 | `key-alias` | Yes | The alias of the signing key stored within the keystore. |
 | `key-password` | No | The password for the specific signing key alias.<br><br>**Default:** If omitted, the `keystore-password` value is used |
-| `service-account` | Yes | The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API. |
+| `service-account` | Yes | Base64-encoded string representation of the Google Cloud Service Account JSON used to authenticate with the Google Play Developer API. |
 | `package-name` | Yes | The application ID (package name) of the Android app (e.g., `com.example.app`). |
 | `release-file` | No | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
 | `mapping-file` | No | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
@@ -88,7 +88,15 @@ Before running the action, ensure you have these external assets and permissions
 
 ### 1. Google Play Service Account
 
-You must create a Service Account in the Google Cloud Console, grant it the necessary permissions in the Google Play Console, and generate a JSON key. Store the raw JSON content as a GitHub Secret.
+You must create a Service Account in the Google Cloud Console, grant it the necessary permissions in the Google Play Console, and generate a JSON key. Encode this JSON file to Base64 and store it as a GitHub Secret.
+
+```bash
+# macOS
+base64 -i service-account.json | pbcopy
+
+# Linux
+base64 -w 0 service-account.json > encoded-sa.txt
+```
 
 ### 2. Release Keystore
 
