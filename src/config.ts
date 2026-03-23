@@ -22,6 +22,7 @@ export const INPUTS = {
   MAPPING_FILE: 'mapping-file',
   TRACK: 'track',
   STATUS: 'status',
+  USER_FRACTION: 'user-fraction',
 } as const
 
 /**
@@ -64,6 +65,8 @@ export interface ActionConfig {
   track: string
   /** The status of the release (e.g., 'completed', 'draft'). */
   status: string
+  /** The fraction of users who will receive the release (between 0 and 1). */
+  userFraction?: number
 }
 
 /**
@@ -94,6 +97,7 @@ export function getConfig(): ActionConfig {
   const mappingFile = requiredInput(INPUTS.MAPPING_FILE)
   const track = requiredInput(INPUTS.TRACK)
   const status = requiredInput(INPUTS.STATUS)
+  const rawUserFraction = optionalInput(INPUTS.USER_FRACTION)
 
   // Ensure the specified project directory exists on the file system.
   if (!existsSync(projectDirectory)) {
@@ -140,6 +144,25 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Validate and parse the optional user fraction property.
+  let userFraction: number | undefined
+  if (rawUserFraction) {
+    userFraction = parseFloat(rawUserFraction)
+    if (isNaN(userFraction) || userFraction <= 0 || userFraction >= 1) {
+      throw new Error(
+        `Invalid ${INPUTS.USER_FRACTION} input: '${rawUserFraction}'. ` +
+          'Must be a number between 0 and 1 (exclusive).',
+      )
+    }
+    if (status !== 'inProgress' && status !== 'halted') {
+      throw new Error(
+        `Invalid ${INPUTS.USER_FRACTION} input: user fraction can only be ` +
+          `specified if status is 'inProgress' or 'halted'. ` +
+          `Current status is '${status}'.`,
+      )
+    }
+  }
+
   // Emit a log message if the keystore password is used as the key password.
   let keyPassword = rawKeyPassword
   if (keyPassword == null || keyPassword.length === 0) {
@@ -163,5 +186,6 @@ export function getConfig(): ActionConfig {
     mappingFile,
     track,
     status,
+    userFraction,
   }
 }
