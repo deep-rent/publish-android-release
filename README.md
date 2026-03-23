@@ -72,6 +72,7 @@ Configure these parameters to customize how the action builds and signs your app
 | `mapping-file` | No | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
 | `track` | No | The Google Play track to publish the release to. Valid options: `internal`, `alpha`, `beta`, `production`.<br><br>**Default:** `internal` |
 | `status` | No | The status of the release. Valid options: `completed`, `draft`, `halted`, `inProgress`.<br><br>**Default:** `completed` |
+| `user-fraction` | No | The fraction of users who will receive the release (between 0.0 and 1.0 exclusive). Only applicable when `status` is set to `inProgress` or `halted`. |
 
 ## Outputs
 
