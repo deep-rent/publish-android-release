@@ -99,6 +99,9 @@ export async function publish(
     }
 
     core.info(`Assigning release to ${track} track with status '${status}'...`)
+    if (userFraction !== undefined) {
+      core.info(`Fraction of eligible users: ${userFraction}`)
+    }
     await publisher.edits.tracks.update({
       packageName,
       editId,

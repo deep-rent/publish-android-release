@@ -125,6 +125,7 @@ describe('publish', () => {
         },
       }),
     )
+    expect(core.info).toHaveBeenCalledWith('Fraction of eligible users: 0.5')
   })
 
   it('throws an error if the API returns no editId', async () => {
