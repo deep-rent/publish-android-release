@@ -23,13 +23,8 @@ export async function publish(
   aabPath: string,
 ): Promise<void> {
   core.info('Authenticating with Google Play...')
-  const decodedServiceAccount = Buffer.from(
-    config.serviceAccount,
-    'base64',
-  ).toString('utf8')
-  const credentials = JSON.parse(decodedServiceAccount)
   const auth = new google.auth.GoogleAuth({
-    credentials,
+    credentials: config.serviceAccount,
     scopes: ['https://www.googleapis.com/auth/androidpublisher'],
   })
 
