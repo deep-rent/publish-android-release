@@ -74,6 +74,7 @@ export interface ActionConfig {
  * the service account JSON is malformed.
  */
 export function getConfig(): ActionConfig {
+  // Helper functions to retrieve inputs from the GitHub Actions runner.
   function requiredInput(name: string): string {
     return core.getInput(name, { required: true })
   }
@@ -81,6 +82,7 @@ export function getConfig(): ActionConfig {
     return core.getInput(name, { required: false })
   }
 
+  // Retrieve and assign all raw inputs from the workflow environment.
   const projectDirectory = requiredInput(INPUTS.PROJECT_DIRECTORY)
   const rawKeystore = requiredInput(INPUTS.KEYSTORE)
   const keystorePassword = requiredInput(INPUTS.KEYSTORE_PASSWORD)
@@ -93,12 +95,14 @@ export function getConfig(): ActionConfig {
   const track = requiredInput(INPUTS.TRACK)
   const status = requiredInput(INPUTS.STATUS)
 
+  // Ensure the specified project directory exists on the file system.
   if (!existsSync(projectDirectory)) {
     throw new Error(
       `Invalid ${INPUTS.PROJECT_DIRECTORY} input: path does not exist`,
     )
   }
 
+  // Decode the Base64-encoded keystore string back into a binary buffer.
   let keystore: Buffer
   try {
     keystore = decodeBase64(rawKeystore)
@@ -109,6 +113,7 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Decode and parse the Base64-encoded service account into a JSON object.
   let serviceAccount: object
   try {
     serviceAccount = decodeBase64JSON(rawServiceAccount)
@@ -119,6 +124,7 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Validate that the provided track is one of the supported values.
   if (!VALID_TRACKS.includes(track)) {
     const valid = VALID_TRACKS.join(', ')
     throw new Error(
@@ -126,6 +132,7 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Validate that the provided release status is allowed
   if (!VALID_STATUSES.includes(status)) {
     const valid = VALID_STATUSES.join(', ')
     throw new Error(
@@ -133,6 +140,7 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Return the fully validated and strongly-typed configuration object.
   return {
     projectDirectory,
     keystore,
