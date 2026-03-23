@@ -98,4 +98,17 @@ describe('config', () => {
     })
     expect(() => getConfig()).toThrow(/is not valid JSON/)
   })
+
+  it('defaults key password to keystore password if not provided', () => {
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.KEY_PASSWORD) return ''
+      if (name === INPUTS.KEYSTORE_PASSWORD) return 'secret-keystore-pass'
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'completed'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
+    expect(getConfig().keyPassword).toBe('secret-keystore-pass')
+  })
 })
