@@ -40,6 +40,7 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
           check-latest: true
+          cache: 'gradle'
 
       - name: Publish to Google Play
         uses: deep-rent/publish-android-release@v1
