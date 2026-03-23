@@ -2,6 +2,8 @@
 
 set -e
 
+cd "$(git rev-parse --show-toplevel)"
+
 OFF='\033[0m'
 BOLD_RED='\033[1;31m'
 BOLD_GREEN='\033[1;32m'
