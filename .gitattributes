@@ -10,3 +10,4 @@ dist/**    -diff linguist-generated=true
 go.mod     text
 go.sum     text
 LICENSE    text
+scripts/** text eol=lf
