@@ -156,7 +156,7 @@ export function getConfig(): ActionConfig {
     }
     if (status !== 'inProgress' && status !== 'halted') {
       throw new Error(
-        `Invalid ${INPUTS.USER_FRACTION} input: user fraction can only be` +
+        `Invalid ${INPUTS.USER_FRACTION} input: user fraction can only be ` +
           `specified if status is 'inProgress' or 'halted'. ` +
           `Current status is '${status}'.`,
       )
