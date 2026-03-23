@@ -95,6 +95,18 @@ describe('config', () => {
     expect(() => getConfig()).toThrow(/Invalid status input: 'invalid-status'/)
   })
 
+  it('throws an error if the keystore is not a valid Base64 string', () => {
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.KEYSTORE) return undefined
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'completed'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
+    expect(() => getConfig()).toThrow(/expected a Base64 string/)
+  })
+
   it('throws an error if the service account is not a valid Base64-encoded JSON string', () => {
     ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
       if (name === INPUTS.SERVICE_ACCOUNT)
