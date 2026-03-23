@@ -106,6 +106,27 @@ describe('publish', () => {
     expect(mockCommit).toHaveBeenCalled()
   })
 
+  it('successfully publishes an AAB to a user fraction when status is inProgress', async () => {
+    const configWithFraction = {
+      ...mockConfig,
+      status: 'inProgress',
+      userFraction: 0.5,
+    }
+
+    await publish(configWithFraction, '/tmp/app.aab')
+
+    expect(mockUpdateTrack).toHaveBeenCalledWith(
+      expect.objectContaining({
+        track: 'production',
+        requestBody: {
+          releases: [
+            { versionCodes: ['123'], status: 'inProgress', userFraction: 0.5 },
+          ],
+        },
+      }),
+    )
+  })
+
   it('throws an error if the API returns no editId', async () => {
     mockInsert.mockResolvedValue({ data: {} }) // No ID returned
 
