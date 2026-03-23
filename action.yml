@@ -22,8 +22,8 @@ inputs:
     description: 'The alias of the signing key stored within the keystore.'
     required: true
   key-password:
-    description: 'The password for the specific signing key alias.'
-    required: true
+    description: 'The password for the specific signing key alias. Defaults to the keystore password.'
+    required: false
   service-account:
     description: 'The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API.'
     required: true

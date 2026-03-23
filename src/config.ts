@@ -87,7 +87,7 @@ export function getConfig(): ActionConfig {
       required: true,
     }),
     keyPassword: core.getInput(INPUTS.KEY_PASSWORD, {
-      required: true,
+      required: false,
     }),
     serviceAccount: core.getInput(INPUTS.SERVICE_ACCOUNT, {
       required: true,
@@ -126,6 +126,9 @@ export function getConfig(): ActionConfig {
       `Invalid status: '${config.status}'. Must be one of: ${valid}`,
     )
   }
+
+  // Often, the key and keystore password coincide.
+  if (!config.keyPassword) config.keyPassword = config.keystorePassword
 
   try {
     JSON.parse(config.serviceAccount)
