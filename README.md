@@ -127,6 +127,14 @@ base64 -w 0 android.jks > android.txt
 
 While originally designed for **Capacitor** apps, this action is fully compatible with **Flutter**, **React Native**, and **Native Android** projects. It streamlines your CI/CD pipeline by handling the entire Android release process for any Gradle-based project.
 
+## Support
+
+If you encounter any issues or have ideas for improvement, please visit the [Issues](https://github.com/deep-rent/publish-android-release/issues) page to:
+
+* **Report bugs:** Submit a detailed report if the action isn't working as expected.
+
+* **Request features:** Suggest new capabilities or enhancements.
+
 ## License
 
 This project is open-source and available under the **MIT License**.
