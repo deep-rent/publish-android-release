@@ -61,7 +61,7 @@ Configure these parameters to customize how the action builds and signs your app
 
 | Name | Required | Description |
 |------|:--------:|-------------|
-| `project-directory` | No | Path to the root Android project directory containing the `gradlew` executable.<br><br>**Default:** `.` |
+| `project-directory` | No | Path to the root Android project directory containing the `gradlew` executable.<br><br>**Default:** `.` (current working directory) |
 | `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks`) file. |
 | `keystore-password` | Yes | The password required to unlock the Android keystore. |
 | `key-alias` | Yes | The alias of the signing key stored within the keystore. |
@@ -70,8 +70,8 @@ Configure these parameters to customize how the action builds and signs your app
 | `package-name` | Yes | The application ID (package name) of the Android app (e.g., `com.example.app`). |
 | `release-file` | No | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
 | `mapping-file` | No | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
-| `track` | No | The Google Play track to publish the release to. Valid options: `internal`, `alpha`, `beta`, `production`.<br><br>**Default:** `internal` |
-| `status` | No | The status of the release. Valid options: `completed`, `draft`, `halted`, `inProgress`.<br><br>**Default:** `completed` |
+| `track` | No | The Google Play track to publish the release to.<br><br>**Allowed values:** `internal`, `alpha`, `beta`, `production`.<br>**Default:** `internal` |
+| `status` | No | The status of the release.<br><br>**Allowed values:** `completed`, `draft`, `halted`, `inProgress`.<br>**Default:** `completed` |
 | `user-fraction` | No | The fraction of users who will receive the release (between 0.0 and 1.0 exclusive). Only applicable when `status` is set to `inProgress` or `halted`. |
 
 ## Outputs
