@@ -6,12 +6,13 @@
 // @ts-check
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
+import { defineConfig } from 'eslint/config'
 import jest from 'eslint-plugin-jest'
 import prettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 import licenseHeader from 'eslint-plugin-license-header'
 
-export default tseslint.config(
+export default defineConfig(
   {
     ignores: ['coverage/**', 'dist/**', 'node_modules/**'],
   },
