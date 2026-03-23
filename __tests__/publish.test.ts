@@ -34,14 +34,17 @@ const { OUTPUTS } = await import('../src/config.js')
 describe('publish', () => {
   const mockConfig = {
     projectDirectory: './android',
+    keystore: Buffer.from('mock-keystore'),
+    keystorePassword: 'mock-keystore-password',
+    keyAlias: 'mock-key-alias',
+    keyPassword: 'mock-key-password',
+    serviceAccount: { client_email: 'test@test.com' },
     packageName: 'com.example.app',
     releaseFile: 'app/build/outputs/bundle/release/app-release.aab',
     mappingFile: 'app/build/outputs/mapping/release/mapping.txt',
     track: 'production',
     status: 'completed',
-    serviceAccount: '{"client_email": "test@test.com"}',
   } as ActionConfig
-
   const mockedExistsSync = jest.mocked(existsSync)
   const mockedCreateReadStream = jest.mocked(createReadStream)
   const mockedGoogle = jest.mocked(google)

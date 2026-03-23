@@ -28,9 +28,16 @@ describe('keystore', () => {
   describe('createKeystore', () => {
     it('decodes base64 data and writes it to a temporary file', async () => {
       // "test" in base64 is "dGVzdA=="
-      const result = await createKeystore('dGVzdA==')
+      const result = await createKeystore(Buffer.from('dGVzdA==', 'base64'))
       expect(mockedFs.writeFile).toHaveBeenCalled()
       expect(result).toMatch(/\.keystore$/)
+    })
+
+    it('throws an error if writing the keystore to disk fails', async () => {
+      mockedFs.writeFile.mockRejectedValue(new Error('write error'))
+      await expect(
+        createKeystore(Buffer.from('dGVzdA==', 'base64')),
+      ).rejects.toThrow(/Failed to save keystore/)
     })
   })
 

@@ -23,9 +23,8 @@ export async function publish(
   aabPath: string,
 ): Promise<void> {
   core.info('Authenticating with Google Play...')
-  const credentials = JSON.parse(config.serviceAccount)
   const auth = new google.auth.GoogleAuth({
-    credentials,
+    credentials: config.serviceAccount,
     scopes: ['https://www.googleapis.com/auth/androidpublisher'],
   })
 
@@ -85,7 +84,8 @@ export async function publish(
       core.info('Mapping file uploaded successfully.')
     } else {
       core.info(
-        `No mapping file found at ${config.mappingFile}. Skipping deobfuscation file upload.`,
+        `No mapping file found at ${config.mappingFile}.` +
+          'Skipping deobfuscation file upload.',
       )
     }
 

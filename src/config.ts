@@ -5,6 +5,7 @@
 
 import * as core from '@actions/core'
 import { existsSync } from 'node:fs'
+import { decodeBase64, decodeBase64JSON } from './utils.js'
 
 /**
  * Expected input keys from the GitHub Actions workflow environment.
@@ -43,16 +44,16 @@ const VALID_STATUSES = ['completed', 'draft', 'halted', 'inProgress']
 export interface ActionConfig {
   /** The path to the root of the Android project directory. */
   projectDirectory: string
-  /** The Base64-encoded contents of the signing keystore. */
-  keystore: string
+  /** The decoded binary buffer of the signing keystore. */
+  keystore: Buffer
   /** The password for the signing keystore. */
   keystorePassword: string
   /** The alias of the signing key. */
   keyAlias: string
   /** The password for the signing key. */
   keyPassword: string
-  /** The JSON string of the Google Cloud service account credentials. */
-  serviceAccount: string
+  /** The decoded and parsed Google Cloud service account credentials object. */
+  serviceAccount: object
   /** The application ID (package name) of the Android app. */
   packageName: string
   /** The relative path to the generated AAB file to upload. */
@@ -73,70 +74,74 @@ export interface ActionConfig {
  * the service account JSON is malformed.
  */
 export function getConfig(): ActionConfig {
-  const config: ActionConfig = {
-    projectDirectory: core.getInput(INPUTS.PROJECT_DIRECTORY, {
-      required: true,
-    }),
-    keystore: core.getInput(INPUTS.KEYSTORE, {
-      required: true,
-    }),
-    keystorePassword: core.getInput(INPUTS.KEYSTORE_PASSWORD, {
-      required: true,
-    }),
-    keyAlias: core.getInput(INPUTS.KEY_ALIAS, {
-      required: true,
-    }),
-    keyPassword: core.getInput(INPUTS.KEY_PASSWORD, {
-      required: false,
-    }),
-    serviceAccount: core.getInput(INPUTS.SERVICE_ACCOUNT, {
-      required: true,
-    }),
-    packageName: core.getInput(INPUTS.PACKAGE_NAME, {
-      required: true,
-    }),
-    releaseFile: core.getInput(INPUTS.RELEASE_FILE, {
-      required: true,
-    }),
-    mappingFile: core.getInput(INPUTS.MAPPING_FILE, {
-      required: true,
-    }),
-    track: core.getInput(INPUTS.TRACK, {
-      required: true,
-    }),
-    status: core.getInput(INPUTS.STATUS, {
-      required: true,
-    }),
+  function getRequiredInput(name: string): string {
+    return core.getInput(name, { required: true })
+  }
+  function getOptionalInput(name: string): string {
+    return core.getInput(name, { required: false })
   }
 
-  if (!existsSync(config.projectDirectory)) {
-    throw new Error(`Android directory not found: ${config.projectDirectory}`)
+  const projectDirectory = getRequiredInput(INPUTS.PROJECT_DIRECTORY)
+  const rawKeystore = getRequiredInput(INPUTS.KEYSTORE)
+  const keystorePassword = getRequiredInput(INPUTS.KEYSTORE_PASSWORD)
+  const keyAlias = getRequiredInput(INPUTS.KEY_ALIAS)
+  const keyPassword = getOptionalInput(INPUTS.KEY_PASSWORD) || keystorePassword
+  const rawServiceAccount = getRequiredInput(INPUTS.SERVICE_ACCOUNT)
+  const packageName = getRequiredInput(INPUTS.PACKAGE_NAME)
+  const releaseFile = getRequiredInput(INPUTS.RELEASE_FILE)
+  const mappingFile = getRequiredInput(INPUTS.MAPPING_FILE)
+  const track = getRequiredInput(INPUTS.TRACK)
+  const status = getRequiredInput(INPUTS.STATUS)
+
+  if (!existsSync(projectDirectory)) {
+    throw new Error(`Project directory not found: ${projectDirectory}`)
   }
 
-  if (!VALID_TRACKS.includes(config.track)) {
+  let keystore: Buffer
+  try {
+    keystore = decodeBase64(rawKeystore)
+  } catch (error: unknown) {
+    throw new Error(
+      `Invalid ${INPUTS.KEYSTORE} input: expected a Base64 string.`,
+      { cause: error },
+    )
+  }
+
+  let serviceAccount: object
+  try {
+    serviceAccount = decodeBase64JSON(rawServiceAccount)
+  } catch (error: unknown) {
+    throw new Error(
+      `Invalid ${INPUTS.SERVICE_ACCOUNT} input: expected a Base64 JSON string.`,
+      { cause: error },
+    )
+  }
+
+  if (!VALID_TRACKS.includes(track)) {
     const valid = VALID_TRACKS.join(', ')
     throw new Error(
-      `Invalid track: '${config.track}'. Must be one of: ${valid}`,
+      `Invalid ${INPUTS.TRACK} input: '${track}'. Must be one of: ${valid}`,
     )
   }
 
-  if (!VALID_STATUSES.includes(config.status)) {
+  if (!VALID_STATUSES.includes(status)) {
     const valid = VALID_STATUSES.join(', ')
     throw new Error(
-      `Invalid status: '${config.status}'. Must be one of: ${valid}`,
+      `Invalid ${INPUTS.STATUS} input: '${status}'. Must be one of: ${valid}`,
     )
   }
 
-  // Often, the key and keystore password coincide.
-  if (!config.keyPassword) config.keyPassword = config.keystorePassword
-
-  try {
-    JSON.parse(config.serviceAccount)
-  } catch (error: unknown) {
-    throw new Error(`${INPUTS.SERVICE_ACCOUNT} is not valid JSON.`, {
-      cause: error,
-    })
+  return {
+    projectDirectory,
+    keystore,
+    keystorePassword,
+    keyAlias,
+    keyPassword,
+    serviceAccount,
+    packageName,
+    releaseFile,
+    mappingFile,
+    track,
+    status,
   }
-
-  return config
 }

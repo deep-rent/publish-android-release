@@ -50,7 +50,7 @@ jobs:
           keystore-password: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
           key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          service-account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          service-account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
           track: 'production'
           status: 'completed'
 ```
@@ -62,11 +62,11 @@ Configure these parameters to customize how the action builds and signs your app
 | Name | Required | Description |
 |------|:--------:|-------------|
 | `project-directory` | No | Path to the root Android project directory containing the `gradlew` executable.<br><br>**Default:** `.` |
-| `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks` or `.keystore`) file. |
+| `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks`) file. |
 | `keystore-password` | Yes | The password required to unlock the Android keystore. |
 | `key-alias` | Yes | The alias of the signing key stored within the keystore. |
 | `key-password` | No | The password for the specific signing key alias.<br><br>**Default:** If omitted, the `keystore-password` value is used |
-| `service-account` | Yes | The plain text JSON contents of the Google Cloud Service Account used to authenticate with the Google Play Developer API. |
+| `service-account` | Yes | Base64-encoded string representation of the Google Cloud Service Account JSON used to authenticate with the Google Play Developer API. |
 | `package-name` | Yes | The application ID (package name) of the Android app (e.g., `com.example.app`). |
 | `release-file` | No | The relative path to the generated Android App Bundle (AAB) file.<br><br>**Default:** `app/build/outputs/bundle/release/app-release.aab` |
 | `mapping-file` | No | The relative path to the generated ProGuard/R8 `mapping.txt` file.<br><br>**Default:** `app/build/outputs/mapping/release/mapping.txt` |
@@ -88,21 +88,38 @@ Before running the action, ensure you have these external assets and permissions
 
 ### 1. Google Play Service Account
 
-You must create a Service Account in the Google Cloud Console, grant it the necessary permissions in the Google Play Console, and generate a JSON key. Store the raw JSON content as a GitHub Secret.
-
-### 2. Release Keystore
-
-Encode your release `.jks` or `.keystore` file to Base64 and save it as a GitHub Secret.
+You must create a Service Account in the Google Cloud Console, grant it the necessary permissions in the Google Play Console, and generate a JSON key. Encode this JSON file to Base64 and store it as a GitHub Secret.
 
 ```bash
 # macOS
-base64 -i release.jks | pbcopy
+base64 -i service-account.json | pbcopy
 
 # Linux
-base64 -w 0 release.jks > encoded.txt
+base64 -w 0 service-account.json > encoded-service-account.txt
 
 # Windows (PowerShell)
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks")) | Set-Clipboard
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json")) | Set-Clipboard
+```
+
+### 2. Android Keystore
+
+If you don't have a release keystore yet, you can create one using the Java `keytool` utility:
+
+```bash
+keytool -genkey -v -keystore android.jks -keyalg RSA -keysize 3072 -validity 3600 -alias your-key-alias -storepass your-keystore-password -keypass your-key-password
+```
+
+Encode your binary keystore (`.jks`) file to Base64 and save it as a GitHub Secret.
+
+```bash
+# macOS
+base64 -i android.jks | pbcopy
+
+# Linux
+base64 -w 0 android.jks > android.txt
+
+# Windows (PowerShell)
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("keystore.jks")) | Set-Clipboard
 ```
 
 ## License

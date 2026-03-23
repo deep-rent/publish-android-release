@@ -21,10 +21,12 @@ const { existsSync } = await import('node:fs')
 const { getConfig, INPUTS } = await import('../src/config.js')
 
 describe('config', () => {
-  const serviceAccountFixture = fsActual.readFileSync(
-    path.resolve(import.meta.dirname, '../__fixtures__/service-account.json'),
-    'utf8',
-  )
+  const serviceAccountFixture = Buffer.from(
+    fsActual.readFileSync(
+      path.resolve(import.meta.dirname, '../__fixtures__/service-account.json'),
+      'utf8',
+    ),
+  ).toString('base64')
 
   const mockedExistsSync = jest.mocked(existsSync)
   beforeEach(() => {
@@ -61,11 +63,15 @@ describe('config', () => {
     )
     expect(config.track).toBe('production')
     expect(config.status).toBe('completed')
+    expect(config.serviceAccount).toBeInstanceOf(Object)
+    expect(
+      (config.serviceAccount as { client_email: string }).client_email,
+    ).toBe('github-actions@deep-rent.iam.gserviceaccount.com')
   })
 
   it('throws an error if the project directory does not exist', () => {
     mockedExistsSync.mockReturnValue(false)
-    expect(() => getConfig()).toThrow(/Android directory not found/)
+    expect(() => getConfig()).toThrow(/Project directory not found/)
   })
 
   it('throws an error if an invalid track is provided', () => {
@@ -76,7 +82,7 @@ describe('config', () => {
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
       return 'val'
     })
-    expect(() => getConfig()).toThrow(/Invalid track: 'invalid-track'/)
+    expect(() => getConfig()).toThrow(/Invalid track input: 'invalid-track'/)
   })
 
   it('throws an error if an invalid status is provided', () => {
@@ -86,17 +92,30 @@ describe('config', () => {
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
       return 'val'
     })
-    expect(() => getConfig()).toThrow(/Invalid status: 'invalid-status'/)
+    expect(() => getConfig()).toThrow(/Invalid status input: 'invalid-status'/)
   })
 
-  it('throws an error if the service account is not valid JSON', () => {
+  it('throws an error if the keystore is not a valid Base64 string', () => {
     ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
-      if (name === INPUTS.SERVICE_ACCOUNT) return 'not-json'
+      if (name === INPUTS.KEYSTORE) return undefined
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'completed'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
+    expect(() => getConfig()).toThrow(/expected a Base64 string/)
+  })
+
+  it('throws an error if the service account is not a valid Base64-encoded JSON string', () => {
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.SERVICE_ACCOUNT)
+        return Buffer.from('not-json').toString('base64')
       if (name === INPUTS.TRACK) return 'production'
       if (name === INPUTS.STATUS) return 'completed'
       return 'val'
     })
-    expect(() => getConfig()).toThrow(/is not valid JSON/)
+    expect(() => getConfig()).toThrow(/expected a Base64 JSON string/)
   })
 
   it('defaults key password to keystore password if not provided', () => {
