@@ -40,7 +40,7 @@ describe('main', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockedGetConfig.mockReturnValue({
-      keystore: 'base64',
+      keystore: Buffer.from('base64'),
     } as ActionConfig)
     mockedCreateKeystore.mockResolvedValue('/tmp/keystore.jks')
     mockedBuild.mockResolvedValue('/tmp/app-release.aab')
@@ -51,7 +51,7 @@ describe('main', () => {
     await run()
 
     expect(mockedGetConfig).toHaveBeenCalled()
-    expect(mockedCreateKeystore).toHaveBeenCalledWith('base64')
+    expect(mockedCreateKeystore).toHaveBeenCalledWith(expect.any(Buffer))
     expect(mockedBuild).toHaveBeenCalledWith(
       expect.any(Object),
       '/tmp/keystore.jks',
