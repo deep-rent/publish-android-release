@@ -32,6 +32,13 @@ describe('keystore', () => {
       expect(mockedFs.writeFile).toHaveBeenCalled()
       expect(result).toMatch(/\.keystore$/)
     })
+
+    it('throws an error if writing the keystore to disk fails', async () => {
+      mockedFs.writeFile.mockRejectedValue(new Error('write error'))
+      await expect(
+        createKeystore(Buffer.from('dGVzdA==', 'base64')),
+      ).rejects.toThrow(/Failed to save keystore/)
+    })
   })
 
   describe('cleanup', () => {
