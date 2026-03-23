@@ -74,29 +74,35 @@ export interface ActionConfig {
  * the service account JSON is malformed.
  */
 export function getConfig(): ActionConfig {
-  function getRequiredInput(name: string): string {
+  // Helper functions to retrieve inputs from the GitHub Actions runner.
+  function requiredInput(name: string): string {
     return core.getInput(name, { required: true })
   }
-  function getOptionalInput(name: string): string {
+  function optionalInput(name: string): string {
     return core.getInput(name, { required: false })
   }
 
-  const projectDirectory = getRequiredInput(INPUTS.PROJECT_DIRECTORY)
-  const rawKeystore = getRequiredInput(INPUTS.KEYSTORE)
-  const keystorePassword = getRequiredInput(INPUTS.KEYSTORE_PASSWORD)
-  const keyAlias = getRequiredInput(INPUTS.KEY_ALIAS)
-  const keyPassword = getOptionalInput(INPUTS.KEY_PASSWORD) || keystorePassword
-  const rawServiceAccount = getRequiredInput(INPUTS.SERVICE_ACCOUNT)
-  const packageName = getRequiredInput(INPUTS.PACKAGE_NAME)
-  const releaseFile = getRequiredInput(INPUTS.RELEASE_FILE)
-  const mappingFile = getRequiredInput(INPUTS.MAPPING_FILE)
-  const track = getRequiredInput(INPUTS.TRACK)
-  const status = getRequiredInput(INPUTS.STATUS)
+  // Retrieve and assign all raw inputs from the workflow environment.
+  const projectDirectory = requiredInput(INPUTS.PROJECT_DIRECTORY)
+  const rawKeystore = requiredInput(INPUTS.KEYSTORE)
+  const keystorePassword = requiredInput(INPUTS.KEYSTORE_PASSWORD)
+  const keyAlias = requiredInput(INPUTS.KEY_ALIAS)
+  const rawKeyPassword = optionalInput(INPUTS.KEY_PASSWORD)
+  const rawServiceAccount = requiredInput(INPUTS.SERVICE_ACCOUNT)
+  const packageName = requiredInput(INPUTS.PACKAGE_NAME)
+  const releaseFile = requiredInput(INPUTS.RELEASE_FILE)
+  const mappingFile = requiredInput(INPUTS.MAPPING_FILE)
+  const track = requiredInput(INPUTS.TRACK)
+  const status = requiredInput(INPUTS.STATUS)
 
+  // Ensure the specified project directory exists on the file system.
   if (!existsSync(projectDirectory)) {
-    throw new Error(`Project directory not found: ${projectDirectory}`)
+    throw new Error(
+      `Invalid ${INPUTS.PROJECT_DIRECTORY} input: path does not exist.`,
+    )
   }
 
+  // Decode the Base64-encoded keystore string back into a binary buffer.
   let keystore: Buffer
   try {
     keystore = decodeBase64(rawKeystore)
@@ -107,6 +113,7 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Decode and parse the Base64-encoded service account into a JSON object.
   let serviceAccount: object
   try {
     serviceAccount = decodeBase64JSON(rawServiceAccount)
@@ -117,20 +124,33 @@ export function getConfig(): ActionConfig {
     )
   }
 
+  // Validate that the provided track is one of the supported values.
   if (!VALID_TRACKS.includes(track)) {
     const valid = VALID_TRACKS.join(', ')
     throw new Error(
-      `Invalid ${INPUTS.TRACK} input: '${track}'. Must be one of: ${valid}`,
+      `Invalid ${INPUTS.TRACK} input: '${track}'. Must be one of: ${valid}.`,
     )
   }
 
+  // Validate that the provided release status is allowed.
   if (!VALID_STATUSES.includes(status)) {
     const valid = VALID_STATUSES.join(', ')
     throw new Error(
-      `Invalid ${INPUTS.STATUS} input: '${status}'. Must be one of: ${valid}`,
+      `Invalid ${INPUTS.STATUS} input: '${status}'. Must be one of: ${valid}.`,
     )
   }
 
+  // Emit a log message if the keystore password is used as the key password.
+  let keyPassword = rawKeyPassword
+  if (keyPassword == null || keyPassword.length === 0) {
+    core.info(
+      `No ${INPUTS.KEY_PASSWORD} input provided. ` +
+        `Falling back to ${INPUTS.KEYSTORE_PASSWORD}.`,
+    )
+    keyPassword = keystorePassword
+  }
+
+  // Return the fully validated and strongly-typed configuration object.
   return {
     projectDirectory,
     keystore,

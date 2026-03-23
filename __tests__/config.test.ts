@@ -10,6 +10,7 @@ const fsActual = await import('node:fs')
 
 jest.unstable_mockModule('@actions/core', () => ({
   getInput: jest.fn(),
+  info: jest.fn(),
 }))
 jest.unstable_mockModule('node:fs', () => ({
   ...fsActual,
@@ -71,7 +72,9 @@ describe('config', () => {
 
   it('throws an error if the project directory does not exist', () => {
     mockedExistsSync.mockReturnValue(false)
-    expect(() => getConfig()).toThrow(/Project directory not found/)
+    expect(() => getConfig()).toThrow(
+      /Invalid project-directory input: path does not exist/,
+    )
   })
 
   it('throws an error if an invalid track is provided', () => {
@@ -129,5 +132,8 @@ describe('config', () => {
       return 'val'
     })
     expect(getConfig().keyPassword).toBe('secret-keystore-pass')
+    expect(core.info).toHaveBeenCalledWith(
+      `No ${INPUTS.KEY_PASSWORD} input provided. Falling back to ${INPUTS.KEYSTORE_PASSWORD}.`,
+    )
   })
 })
