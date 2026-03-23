@@ -8,6 +8,7 @@ on:
     paths-ignore:
       - '.github/**'
       - '.vscode/**'
+      - 'scripts/**'
       - 'README.md'
       - 'LICENSE'
   # push:
