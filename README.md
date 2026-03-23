@@ -103,14 +103,20 @@ base64 -w 0 service-account.json > encoded-service-account.txt
 
 ### 2. Android Keystore
 
-Encode your binary release keystore (`.jks`) file to Base64 and save it as a GitHub Secret.
+If you don't have a release keystore yet, you can create one using the Java `keytool` utility:
+
+```bash
+keytool -genkey -v -keystore android.jks -keyalg RSA -keysize 3072 -validity 3600 -alias your-key-alias -storepass your-keystore-password -keypass your-key-password
+```
+
+Encode your binary keystore (`.jks`) file to Base64 and save it as a GitHub Secret.
 
 ```bash
 # macOS
-base64 -i keystore.jks | pbcopy
+base64 -i android.jks | pbcopy
 
 # Linux
-base64 -w 0 keystore.jks > keystore.txt
+base64 -w 0 android.jks > android.txt
 
 # Windows (PowerShell)
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("keystore.jks")) | Set-Clipboard
