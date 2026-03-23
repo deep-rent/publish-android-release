@@ -22,14 +22,23 @@ export async function publish(
   config: ActionConfig,
   aabPath: string,
 ): Promise<void> {
+  const {
+    projectDirectory,
+    serviceAccount,
+    mappingFile,
+    packageName,
+    track,
+    status,
+    userFraction,
+  } = config
+
   core.info('Authenticating with Google Play...')
   const auth = new google.auth.GoogleAuth({
-    credentials: config.serviceAccount,
+    credentials: serviceAccount,
     scopes: ['https://www.googleapis.com/auth/androidpublisher'],
   })
 
   const publisher = google.androidpublisher({ version: 'v3', auth })
-  const { packageName, track, status } = config
 
   core.info(`Starting upload transaction for ${packageName}...`)
   let editId: string | null | undefined
@@ -67,12 +76,12 @@ export async function publish(
     core.info(`Uploaded bundle successfully. Version code: ${versionCode}`)
     core.setOutput(OUTPUTS.VERSION_CODE, versionCode.toString())
 
-    const mappingPath = path.join(config.projectDirectory, config.mappingFile)
+    const mappingPath = path.join(projectDirectory, mappingFile)
 
     if (existsSync(mappingPath)) {
       core.info('Found a mapping file! Uploading for crash deobfuscation...')
       await publisher.edits.deobfuscationfiles.upload({
-        packageName: config.packageName,
+        packageName,
         editId,
         apkVersionCode: versionCode,
         deobfuscationFileType: 'proguard',
@@ -84,7 +93,7 @@ export async function publish(
       core.info('Mapping file uploaded successfully.')
     } else {
       core.info(
-        `No mapping file found at ${config.mappingFile}.` +
+        `No mapping file found at ${mappingFile}.` +
           'Skipping deobfuscation file upload.',
       )
     }
@@ -93,12 +102,13 @@ export async function publish(
     await publisher.edits.tracks.update({
       packageName,
       editId,
-      track: track,
+      track,
       requestBody: {
         releases: [
           {
             versionCodes: [versionCode.toString()],
             status,
+            userFraction,
           },
         ],
       },
@@ -135,7 +145,7 @@ export async function publish(
     if (editId) {
       try {
         await publisher.edits.delete({
-          packageName: config.packageName,
+          packageName,
           editId,
         })
         core.info('Cleaned up orphaned edit transaction.')
