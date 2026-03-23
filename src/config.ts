@@ -51,7 +51,7 @@ export interface ActionConfig {
   keyAlias: string
   /** The password for the signing key. */
   keyPassword: string
-  /** The JSON string of the Google Cloud service account credentials. */
+  /** The Base64-encoded JSON string of the Google Cloud service account credentials. */
   serviceAccount: string
   /** The application ID (package name) of the Android app. */
   packageName: string
@@ -131,11 +131,17 @@ export function getConfig(): ActionConfig {
   if (!config.keyPassword) config.keyPassword = config.keystorePassword
 
   try {
-    JSON.parse(config.serviceAccount)
+    const decoded = Buffer.from(config.serviceAccount, 'base64').toString(
+      'utf8',
+    )
+    JSON.parse(decoded)
   } catch (error: unknown) {
-    throw new Error(`${INPUTS.SERVICE_ACCOUNT} is not valid JSON.`, {
-      cause: error,
-    })
+    throw new Error(
+      `${INPUTS.SERVICE_ACCOUNT} is not a valid Base64-encoded JSON string.`,
+      {
+        cause: error,
+      },
+    )
   }
 
   return config
