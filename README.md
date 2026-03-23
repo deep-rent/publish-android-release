@@ -101,7 +101,7 @@ base64 -w 0 service-account.json > encoded-service-account.txt
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json")) | Set-Clipboard
 ```
 
-### 2. Release Keystore
+### 2. Android Keystore
 
 Encode your binary release keystore (`.jks`) file to Base64 and save it as a GitHub Secret.
 
