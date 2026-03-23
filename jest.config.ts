@@ -11,14 +11,14 @@ export default {
   coverageDirectory: './coverage',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
   coverageReporters: ['json-summary', 'text', 'lcov'],
-  // coverageThreshold: {
-  //   global: {
-  //     branches: 100,
-  //     functions: 100,
-  //     lines: 100,
-  //     statements: 100
-  //   }
-  // },
+  coverageThreshold: {
+    global: {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
   extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'js'],
   moduleNameMapper: {
