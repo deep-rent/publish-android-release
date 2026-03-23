@@ -43,7 +43,7 @@ if [ -f "package.json" ]; then
 	if [ -f "package-lock.json" ]; then
 		git add package-lock.json
 	fi
-	git commit -m "Bump version to $new_tag"
+	git commit -m "chore: set project version to $new_tag"
 else
 	echo -e "${BOLD_RED}Warning:${OFF} package.json not found. Skipping auto-update."
 fi
