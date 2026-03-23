@@ -39,6 +39,8 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '21'
+          check-latest: true
+          cache: 'gradle'
 
       - name: Publish to Google Play
         uses: deep-rent/publish-android-release@v1
@@ -50,8 +52,8 @@ jobs:
           key-alias: ${{ secrets.ANDROID_KEY_ALIAS }}
           key-password: ${{ secrets.ANDROID_KEY_PASSWORD }}
           service-account: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          track: production
-          status: completed
+          track: 'production'
+          status: 'completed'
 ```
 
 ## Inputs
