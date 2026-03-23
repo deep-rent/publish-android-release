@@ -63,11 +63,15 @@ describe('config', () => {
     )
     expect(config.track).toBe('production')
     expect(config.status).toBe('completed')
+    expect(config.serviceAccount).toBeInstanceOf(Object)
+    expect(
+      (config.serviceAccount as { client_email: string }).client_email,
+    ).toBe('github-actions@deep-rent.iam.gserviceaccount.com')
   })
 
   it('throws an error if the project directory does not exist', () => {
     mockedExistsSync.mockReturnValue(false)
-    expect(() => getConfig()).toThrow(/Android directory not found/)
+    expect(() => getConfig()).toThrow(/Project directory not found/)
   })
 
   it('throws an error if an invalid track is provided', () => {
@@ -78,7 +82,7 @@ describe('config', () => {
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
       return 'val'
     })
-    expect(() => getConfig()).toThrow(/Invalid track: 'invalid-track'/)
+    expect(() => getConfig()).toThrow(/Invalid track input: 'invalid-track'/)
   })
 
   it('throws an error if an invalid status is provided', () => {
@@ -88,7 +92,7 @@ describe('config', () => {
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
       return 'val'
     })
-    expect(() => getConfig()).toThrow(/Invalid status: 'invalid-status'/)
+    expect(() => getConfig()).toThrow(/Invalid status input: 'invalid-status'/)
   })
 
   it('throws an error if the service account is not a valid Base64-encoded JSON string', () => {
@@ -99,9 +103,7 @@ describe('config', () => {
       if (name === INPUTS.STATUS) return 'completed'
       return 'val'
     })
-    expect(() => getConfig()).toThrow(
-      /is not a valid Base64-encoded JSON string/,
-    )
+    expect(() => getConfig()).toThrow(/expected a Base64 JSON string/)
   })
 
   it('defaults key password to keystore password if not provided', () => {
