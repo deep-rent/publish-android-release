@@ -42,7 +42,7 @@ jobs:
           cache: 'gradle'
 
       - name: Publish to Google Play
-        uses: deep-rent/publish-android-release@v1
+        uses: deep-rent/publish-android-release@v2
         with:
           project-directory: './apps/example-app'
           package-name: 'com.example.app'
