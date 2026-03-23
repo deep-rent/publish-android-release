@@ -21,10 +21,12 @@ const { existsSync } = await import('node:fs')
 const { getConfig, INPUTS } = await import('../src/config.js')
 
 describe('config', () => {
-  const serviceAccountFixture = fsActual.readFileSync(
-    path.resolve(import.meta.dirname, '../__fixtures__/service-account.json'),
-    'utf8',
-  )
+  const serviceAccountFixture = Buffer.from(
+    fsActual.readFileSync(
+      path.resolve(import.meta.dirname, '../__fixtures__/service-account.json'),
+      'utf8',
+    ),
+  ).toString('base64')
 
   const mockedExistsSync = jest.mocked(existsSync)
   beforeEach(() => {
@@ -89,14 +91,17 @@ describe('config', () => {
     expect(() => getConfig()).toThrow(/Invalid status: 'invalid-status'/)
   })
 
-  it('throws an error if the service account is not valid JSON', () => {
+  it('throws an error if the service account is not a valid Base64-encoded JSON string', () => {
     ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
-      if (name === INPUTS.SERVICE_ACCOUNT) return 'not-json'
+      if (name === INPUTS.SERVICE_ACCOUNT)
+        return Buffer.from('not-json').toString('base64')
       if (name === INPUTS.TRACK) return 'production'
       if (name === INPUTS.STATUS) return 'completed'
       return 'val'
     })
-    expect(() => getConfig()).toThrow(/is not valid JSON/)
+    expect(() => getConfig()).toThrow(
+      /is not a valid Base64-encoded JSON string/,
+    )
   })
 
   it('defaults key password to keystore password if not provided', () => {
