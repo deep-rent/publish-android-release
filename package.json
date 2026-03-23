@@ -25,7 +25,6 @@
     "all": "npm run format:write && npm run lint && npm run test && npm run build",
     "build:watch": "npm run build -- --watch",
     "build": "npx rimraf ./dist && npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "bundle": "npm run format:write && npm run build",
     "coverage": "npx make-coverage-badge --output-path .github/assets/coverage.svg",
     "format:check": "npx prettier --check .",
     "format:write": "npx prettier --write .",
