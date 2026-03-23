@@ -38,9 +38,9 @@ jobs:
       - name: Test
         run: npm run test
 
-      - name: Package
+      - name: Transpile
         run: |
-          npm run package
+          npm run build
 
       - name: Coverage
         run: |

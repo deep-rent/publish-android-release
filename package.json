@@ -22,16 +22,16 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "all": "npm run format:write && npm run lint && npm run test && npm run package",
-    "bundle": "npm run format:write && npm run package",
+    "all": "npm run format:write && npm run lint && npm run test && npm run build",
+    "build:watch": "npm run build -- --watch",
+    "build": "npx rimraf ./dist && npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "bundle": "npm run format:write && npm run build",
     "coverage": "npx make-coverage-badge --output-path .github/assets/coverage.svg",
     "format:check": "npx prettier --check .",
     "format:write": "npx prettier --write .",
     "lint:fix": "npx eslint . --fix",
     "lint": "npx eslint .",
     "local-action": "npx @github/local-action . src/main.ts",
-    "package:watch": "npm run package -- --watch",
-    "package": "npx rimraf ./dist && npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest"
   },
   "engines": {
