@@ -71,7 +71,9 @@ describe('config', () => {
 
   it('throws an error if the project directory does not exist', () => {
     mockedExistsSync.mockReturnValue(false)
-    expect(() => getConfig()).toThrow(/Project directory not found/)
+    expect(() => getConfig()).toThrow(
+      /Invalid project-directory input: path does not exist/,
+    )
   })
 
   it('throws an error if an invalid track is provided', () => {

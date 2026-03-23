@@ -94,7 +94,9 @@ export function getConfig(): ActionConfig {
   const status = getRequiredInput(INPUTS.STATUS)
 
   if (!existsSync(projectDirectory)) {
-    throw new Error(`Project directory not found: ${projectDirectory}`)
+    throw new Error(
+      `Invalid ${INPUTS.PROJECT_DIRECTORY} input: path does not exist`,
+    )
   }
 
   let keystore: Buffer
