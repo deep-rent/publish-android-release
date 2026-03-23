@@ -34,8 +34,16 @@ if [[ "$latest_tag" != "[unknown]" ]]; then
   fi
 fi
 
+echo -e "\nReady to release ${BOLD_GREEN}$new_tag${OFF} (Current: ${BOLD_BLUE}$latest_tag${OFF})"
+read -r -p "Proceed with the release? [y/N]: " confirm
+
+if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+  echo -e "${BOLD_RED}Release aborted.${OFF}"
+  exit 0
+fi
+
 if [ -f "package.json" ]; then
-  echo -e "Updating package.json to ${BOLD_PURPLE}${new_version}${OFF}..."
+  echo -e "\nUpdating package.json to ${BOLD_PURPLE}${new_version}${OFF}..."
   npm version "$new_version" --no-git-tag-version > /dev/null
   git add package.json
   if [ -f "package-lock.json" ]; then
