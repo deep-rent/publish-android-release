@@ -84,7 +84,8 @@ export async function publish(
       core.info('Mapping file uploaded successfully.')
     } else {
       core.info(
-        `No mapping file found at ${config.mappingFile}. Skipping deobfuscation file upload.`,
+        `No mapping file found at ${config.mappingFile}.` +
+          'Skipping deobfuscation file upload.',
       )
     }
 
