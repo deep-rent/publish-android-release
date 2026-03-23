@@ -45,7 +45,7 @@ export default defineConfig({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (terser as any)({
       ecma: 2023,
-      maxWorkers: 4,
+      maxWorkers: 2,
       format: {
         comments: false,
       },
