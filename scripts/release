@@ -4,6 +4,12 @@ set -e
 
 cd "$(git rev-parse --show-toplevel)"
 
+DRY_RUN=false
+if [[ "$1" == "--dry-run" ]]; then
+  DRY_RUN=true
+  echo -e "\n--- DRY RUN MODE --- No changes will be made.\n"
+fi
+
 OFF='\033[0m'
 BOLD_RED='\033[1;31m'
 BOLD_GREEN='\033[1;32m'
@@ -44,20 +50,35 @@ fi
 
 if [ -f "package.json" ]; then
   echo -e "\nUpdating package.json to ${BOLD_PURPLE}${new_version}${OFF}..."
-  npm version "$new_version" --no-git-tag-version > /dev/null
-  git add package.json
-  if [ -f "package-lock.json" ]; then
-    git add package-lock.json
+  if [ "$DRY_RUN" = false ]; then
+    npm version "$new_version" --no-git-tag-version > /dev/null
+    git add package.json
+    if [ -f "package-lock.json" ]; then
+      git add package-lock.json
+    fi
+    git commit -m "chore: set project version to $new_tag"
+  else
+    echo -e "  ${BOLD_BLUE}[DRY RUN]${OFF} Would run: npm version $new_version --no-git-tag-version"
+    echo -e "  ${BOLD_BLUE}[DRY RUN]${OFF} Would run: git add package.json package-lock.json"
+    echo -e "  ${BOLD_BLUE}[DRY RUN]${OFF} Would run: git commit -m \"chore: set project version to $new_tag\""
   fi
-  git commit -m "chore: set project version to $new_tag"
 else
   echo -e "${BOLD_RED}Warning:${OFF} package.json not found. Skipping auto-update."
 fi
 
-git tag "$new_tag" --annotate --message "Release $new_tag"
-echo -e "Tagged: ${BOLD_GREEN}$new_tag${OFF}"
+echo -e "\nTagging: ${BOLD_GREEN}$new_tag${OFF}"
+if [ "$DRY_RUN" = false ]; then
+  git tag "$new_tag" --annotate --message "Release $new_tag"
+else
+  echo -e "  ${BOLD_BLUE}[DRY RUN]${OFF} Would run: git tag $new_tag --annotate --message \"Release $new_tag\""
+fi
 
-git push --follow-tags
-echo -e "Tag ${BOLD_GREEN}$new_tag${OFF} pushed to remote"
+echo -e "\nPushing to remote..."
+if [ "$DRY_RUN" = false ]; then
+  git push --follow-tags
+  echo -e "Tag ${BOLD_GREEN}$new_tag${OFF} pushed to remote"
+else
+  echo -e "  ${BOLD_BLUE}[DRY RUN]${OFF} Would run: git push --follow-tags"
+fi
 
-echo -e "${BOLD_GREEN}Done!${OFF}"
+echo -e "\n${BOLD_GREEN}Done!${OFF}"
