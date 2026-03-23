@@ -18,12 +18,14 @@ fi
 
 echo -e "The latest release tag is: ${BOLD_BLUE}${latest_tag}${OFF}"
 
-read -r -p 'Enter a new release tag (vX.Y.Z format): ' new_tag
+read -r -p 'Enter a new release version (X.Y.Z format): ' new_version
 
-if ! echo "$new_tag" | grep -q -E "^v[0-9]+\.[0-9]+\.[0-9]+$"; then
-  echo -e "Tag: ${BOLD_BLUE}$new_tag${OFF} is ${BOLD_RED}not valid${OFF} (must be in ${BOLD}vX.Y.Z${OFF} format)"
+if ! echo "$new_version" | grep -q -E "^[0-9]+\.[0-9]+\.[0-9]+$"; then
+  echo -e "Version: ${BOLD_BLUE}$new_version${OFF} is ${BOLD_RED}not valid${OFF} (must be strictly in ${BOLD}X.Y.Z${OFF} format)"
   exit 1
 fi
+
+new_tag="v$new_version"
 
 if [[ "$latest_tag" != "[unknown]" ]]; then
   if [[ "$(printf '%s\n%s' "$latest_tag" "$new_tag" | sort -V | head -n1)" == "$new_tag" ]]; then
@@ -33,8 +35,8 @@ if [[ "$latest_tag" != "[unknown]" ]]; then
 fi
 
 if [ -f "package.json" ]; then
-  echo -e "Updating package.json to ${BOLD_PURPLE}${new_tag#v}${OFF}..."
-  npm version "${new_tag#v}" --no-git-tag-version > /dev/null
+  echo -e "Updating package.json to ${BOLD_PURPLE}${new_version}${OFF}..."
+  npm version "$new_version" --no-git-tag-version > /dev/null
   git add package.json
   if [ -f "package-lock.json" ]; then
     git add package-lock.json
