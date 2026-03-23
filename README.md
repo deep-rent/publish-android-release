@@ -62,7 +62,7 @@ Configure these parameters to customize how the action builds and signs your app
 | Name | Required | Description |
 |------|:--------:|-------------|
 | `project-directory` | No | Path to the root Android project directory containing the `gradlew` executable.<br><br>**Default:** `.` |
-| `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks` or `.keystore`) file. |
+| `keystore` | Yes | Base64-encoded string representation of your Android release keystore (`.jks`) file. |
 | `keystore-password` | Yes | The password required to unlock the Android keystore. |
 | `key-alias` | Yes | The alias of the signing key stored within the keystore. |
 | `key-password` | No | The password for the specific signing key alias.<br><br>**Default:** If omitted, the `keystore-password` value is used |
@@ -95,22 +95,25 @@ You must create a Service Account in the Google Cloud Console, grant it the nece
 base64 -i service-account.json | pbcopy
 
 # Linux
-base64 -w 0 service-account.json > encoded-sa.txt
+base64 -w 0 service-account.json > encoded-service-account.txt
+
+# Windows (PowerShell)
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json")) | Set-Clipboard
 ```
 
 ### 2. Release Keystore
 
-Encode your release `.jks` or `.keystore` file to Base64 and save it as a GitHub Secret.
+Encode your binary release keystore (`.jks`) file to Base64 and save it as a GitHub Secret.
 
 ```bash
 # macOS
-base64 -i release.jks | pbcopy
+base64 -i keystore.jks | pbcopy
 
 # Linux
-base64 -w 0 release.jks > encoded.txt
+base64 -w 0 keystore.jks > keystore.txt
 
 # Windows (PowerShell)
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks")) | Set-Clipboard
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("keystore.jks")) | Set-Clipboard
 ```
 
 ## License
