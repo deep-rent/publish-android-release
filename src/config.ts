@@ -98,7 +98,7 @@ export function getConfig(): ActionConfig {
   // Ensure the specified project directory exists on the file system.
   if (!existsSync(projectDirectory)) {
     throw new Error(
-      `Invalid ${INPUTS.PROJECT_DIRECTORY} input: path does not exist`,
+      `Invalid ${INPUTS.PROJECT_DIRECTORY} input: path does not exist.`,
     )
   }
 
@@ -128,7 +128,7 @@ export function getConfig(): ActionConfig {
   if (!VALID_TRACKS.includes(track)) {
     const valid = VALID_TRACKS.join(', ')
     throw new Error(
-      `Invalid ${INPUTS.TRACK} input: '${track}'. Must be one of: ${valid}`,
+      `Invalid ${INPUTS.TRACK} input: '${track}'. Must be one of: ${valid}.`,
     )
   }
 
@@ -136,7 +136,7 @@ export function getConfig(): ActionConfig {
   if (!VALID_STATUSES.includes(status)) {
     const valid = VALID_STATUSES.join(', ')
     throw new Error(
-      `Invalid ${INPUTS.STATUS} input: '${status}'. Must be one of: ${valid}`,
+      `Invalid ${INPUTS.STATUS} input: '${status}'. Must be one of: ${valid}.`,
     )
   }
 
