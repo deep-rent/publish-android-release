@@ -47,6 +47,8 @@ describe('config', () => {
           return 'completed'
         case INPUTS.SERVICE_ACCOUNT:
           return serviceAccountFixture
+        case INPUTS.USER_FRACTION:
+          return ''
         default:
           return 'some-value'
       }
@@ -83,6 +85,7 @@ describe('config', () => {
       if (name === INPUTS.PROJECT_DIRECTORY) return './android'
       if (name === INPUTS.STATUS) return 'completed'
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      if (name === INPUTS.USER_FRACTION) return ''
       return 'val'
     })
     expect(() => getConfig()).toThrow(/Invalid track input: 'invalid-track'/)
@@ -93,6 +96,7 @@ describe('config', () => {
       if (name === INPUTS.TRACK) return 'production'
       if (name === INPUTS.STATUS) return 'invalid-status'
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      if (name === INPUTS.USER_FRACTION) return ''
       return 'val'
     })
     expect(() => getConfig()).toThrow(/Invalid status input: 'invalid-status'/)
@@ -105,6 +109,7 @@ describe('config', () => {
       if (name === INPUTS.TRACK) return 'production'
       if (name === INPUTS.STATUS) return 'completed'
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      if (name === INPUTS.USER_FRACTION) return ''
       return 'val'
     })
     expect(() => getConfig()).toThrow(/expected a Base64 string/)
@@ -116,6 +121,7 @@ describe('config', () => {
         return Buffer.from('not-json').toString('base64')
       if (name === INPUTS.TRACK) return 'production'
       if (name === INPUTS.STATUS) return 'completed'
+      if (name === INPUTS.USER_FRACTION) return ''
       return 'val'
     })
     expect(() => getConfig()).toThrow(/expected a Base64 JSON string/)
@@ -129,11 +135,50 @@ describe('config', () => {
       if (name === INPUTS.TRACK) return 'production'
       if (name === INPUTS.STATUS) return 'completed'
       if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      if (name === INPUTS.USER_FRACTION) return ''
       return 'val'
     })
     expect(getConfig().keyPassword).toBe('secret-keystore-pass')
     expect(core.info).toHaveBeenCalledWith(
       `No ${INPUTS.KEY_PASSWORD} input provided. Falling back to ${INPUTS.KEYSTORE_PASSWORD}.`,
+    )
+  })
+
+  it('parses user-fraction correctly when status is inProgress', () => {
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'inProgress'
+      if (name === INPUTS.USER_FRACTION) return '0.5'
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
+    expect(getConfig().userFraction).toBe(0.5)
+  })
+
+  it('throws an error if user-fraction is out of bounds', () => {
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'inProgress'
+      if (name === INPUTS.USER_FRACTION) return '1.5'
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
+    expect(() => getConfig()).toThrow(/Must be a number between 0 and 1/)
+  })
+
+  it('throws an error if user-fraction is provided but status is not inProgress or halted', () => {
+    ;(core.getInput as jest.Mock).mockImplementation((name: unknown) => {
+      if (name === INPUTS.TRACK) return 'production'
+      if (name === INPUTS.STATUS) return 'completed'
+      if (name === INPUTS.USER_FRACTION) return '0.2'
+      if (name === INPUTS.PROJECT_DIRECTORY) return './android'
+      if (name === INPUTS.SERVICE_ACCOUNT) return serviceAccountFixture
+      return 'val'
+    })
+    expect(() => getConfig()).toThrow(
+      /can only be specified if status is 'inProgress' or 'halted'/,
     )
   })
 })
