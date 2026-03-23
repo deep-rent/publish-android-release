@@ -22,10 +22,10 @@ fi
 
 echo -e "The latest release tag is: ${BOLD_BLUE}${latest_tag}${OFF}"
 
-read -r -p 'Enter a new release tag (vX.X.X format): ' new_tag
+read -r -p 'Enter a new release tag (vX.Y.Z format): ' new_tag
 
 if ! echo "$new_tag" | grep -q -E "$SEMVER_TAG_REGEX"; then
-  echo -e "Tag: ${BOLD_BLUE}$new_tag${OFF} is ${BOLD_RED}not valid${OFF} (must be in ${BOLD}vX.X.X${OFF} format)"
+  echo -e "Tag: ${BOLD_BLUE}$new_tag${OFF} is ${BOLD_RED}not valid${OFF} (must be in ${BOLD}vX.Y.Z${OFF} format)"
   exit 1
 fi
 
