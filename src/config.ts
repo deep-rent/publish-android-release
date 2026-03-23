@@ -87,7 +87,7 @@ export function getConfig(): ActionConfig {
   const rawKeystore = requiredInput(INPUTS.KEYSTORE)
   const keystorePassword = requiredInput(INPUTS.KEYSTORE_PASSWORD)
   const keyAlias = requiredInput(INPUTS.KEY_ALIAS)
-  const keyPassword = optionalInput(INPUTS.KEY_PASSWORD) || keystorePassword
+  const rawKeyPassword = optionalInput(INPUTS.KEY_PASSWORD)
   const rawServiceAccount = requiredInput(INPUTS.SERVICE_ACCOUNT)
   const packageName = requiredInput(INPUTS.PACKAGE_NAME)
   const releaseFile = requiredInput(INPUTS.RELEASE_FILE)
@@ -132,12 +132,22 @@ export function getConfig(): ActionConfig {
     )
   }
 
-  // Validate that the provided release status is allowed
+  // Validate that the provided release status is allowed.
   if (!VALID_STATUSES.includes(status)) {
     const valid = VALID_STATUSES.join(', ')
     throw new Error(
       `Invalid ${INPUTS.STATUS} input: '${status}'. Must be one of: ${valid}.`,
     )
+  }
+
+  // Emit a log message if the keystore password is used as the key password.
+  let keyPassword = rawKeyPassword
+  if (keyPassword == null || keyPassword.length === 0) {
+    core.debug(
+      `No ${INPUTS.KEY_PASSWORD} input provided. ` +
+        `Falling back to ${INPUTS.KEYSTORE_PASSWORD}.`,
+    )
+    keyPassword = keystorePassword
   }
 
   // Return the fully validated and strongly-typed configuration object.

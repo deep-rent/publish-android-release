@@ -10,6 +10,7 @@ const fsActual = await import('node:fs')
 
 jest.unstable_mockModule('@actions/core', () => ({
   getInput: jest.fn(),
+  debug: jest.fn(),
 }))
 jest.unstable_mockModule('node:fs', () => ({
   ...fsActual,
@@ -131,5 +132,8 @@ describe('config', () => {
       return 'val'
     })
     expect(getConfig().keyPassword).toBe('secret-keystore-pass')
+    expect(core.debug).toHaveBeenCalledWith(
+      `No ${INPUTS.KEY_PASSWORD} input provided. Falling back to ${INPUTS.KEYSTORE_PASSWORD}.`,
+    )
   })
 })
