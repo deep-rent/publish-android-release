@@ -6,7 +6,7 @@
 
 A GitHub Action that automatically builds, signs, and uploads an **Android App Bundle** (AAB) to the **Google Play Console**.
 
-While originally designed for *Capacitor** apps, this action is fully compatible with **Flutter**, **React Native**, and **Native Android** projects. It streamlines your CI/CD pipeline by handling the entire Android release process for any Gradle-based project.
+While originally designed for **Capacitor** apps, this action is fully compatible with **Flutter**, **React Native**, and **Native Android** projects. It streamlines your CI/CD pipeline by handling the entire Android release process for any Gradle-based project.
 
 ## Features
 
