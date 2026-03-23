@@ -143,7 +143,7 @@ export function getConfig(): ActionConfig {
   // Emit a log message if the keystore password is used as the key password.
   let keyPassword = rawKeyPassword
   if (keyPassword == null || keyPassword.length === 0) {
-    core.debug(
+    core.info(
       `No ${INPUTS.KEY_PASSWORD} input provided. ` +
         `Falling back to ${INPUTS.KEYSTORE_PASSWORD}.`,
     )
