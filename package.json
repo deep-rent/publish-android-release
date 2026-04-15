@@ -42,7 +42,7 @@
     "googleapis": "171.4.0"
   },
   "devDependencies": {
-    "@eslint/compat": "2.0.3",
+    "@eslint/compat": "2.0.4",
     "@eslint/eslintrc": "3.3.5",
     "@eslint/js": "10.0.1",
     "@github/local-action": "7.0.1",
