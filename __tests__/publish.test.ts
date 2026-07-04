@@ -153,7 +153,6 @@ describe('publish', () => {
     const conflictError = new Error(
       'APK specifies a version code that has already been used.',
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(conflictError as any).response = { status: 403 }
 
     mockUploadBundle.mockRejectedValue(conflictError)

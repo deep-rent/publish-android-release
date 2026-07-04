@@ -29,20 +29,15 @@ export default defineConfig({
     propertyReadSideEffects: false,
   },
   plugins: [
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (nodeResolve as any)({ preferBuiltins: true }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (commonjs as any)(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (json as any)(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (typescript as any)({
       compilerOptions: {
         moduleResolution: 'bundler',
         module: 'ESNext',
       },
     }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (terser as any)({
       ecma: 2023,
       maxWorkers: 2,
@@ -55,7 +50,7 @@ export default defineConfig({
       },
     }),
   ],
-  onwarn: (warning, warn) => {
+  onwarn: (warning: any, warn: any) => {
     if (
       warning.code === 'THIS_IS_UNDEFINED' ||
       warning.code === 'CIRCULAR_DEPENDENCY'
