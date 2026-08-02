@@ -37,7 +37,7 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@actions/core": "3.0.0",
+    "@actions/core": "3.0.1",
     "@actions/exec": "3.0.0",
     "googleapis": "173.0.0"
   },
